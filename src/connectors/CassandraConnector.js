@@ -2,6 +2,13 @@
 
 const cassandra = require('cassandra-driver');
 
+const CASSANDRA_CONTACT_POINTS = ['1.2.3.4']; //TODO: get from env var
+
+const options = {
+  contactPoints: CASSANDRA_CONTACT_POINTS
+
+};
+
 module.exports = {
   getClient: function (contactPoints, keyspace) {
     const client = new cassandra.Client({ contactPoints: contactPoints, keyspace: keyspace }); //http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/
