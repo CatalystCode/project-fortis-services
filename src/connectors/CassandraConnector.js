@@ -5,7 +5,7 @@ const cassandra = require('cassandra-driver');
 const CASSANDRA_CONTACT_POINTS = ['1.2.3.4']; //TODO: get from env var
 
 const options = {
-  contactPoints: CASSANDRA_CONTACT_POINTS
+  contactPoints:CASSANDRA_CONTACT_POINTS
 
 };
 
