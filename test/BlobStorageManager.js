@@ -10,7 +10,6 @@ describe('BlobStorageManager', function() {
 
   describe('#Get(containerName, blobName, id)', function() {
 
-    /*
     it('should return a single item', function() {
       let args = {};
       args.containerName = "settings";
@@ -25,7 +24,7 @@ describe('BlobStorageManager', function() {
           expect(Boolean(err)).to.be.false;
         });
     });
-    */
+
     /*
     it('should return null', function() {
       let args = {};
@@ -104,6 +103,21 @@ describe('BlobStorageManager', function() {
         });
     });
     */
-
   });
+
+  describe('#List(containerName, blobName)', function() {
+    it('should return all items', function() {
+      let args = {};
+      args.containerName = "settings";
+      args.blobName = "siteTypes/humanitarian/topics/defaultTopics.json";
+
+      return blobStorageManager.List(args.containerName, args.blobName)
+        .then(function(response) {
+          expect(response).to.be.an('object');
+        }).catch(function(err) {
+          expect(Boolean(err)).to.be.false;
+        });
+    });
+  });
+
 });

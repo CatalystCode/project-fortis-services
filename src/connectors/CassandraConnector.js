@@ -17,8 +17,6 @@ module.exports = {
 Add app insights for reporting errors:
 Connecting to cassandra
 Failed storage mutations
-
-unit test with mocha and sinon
 */
 
 //let appInsights = require("applicationinsights");

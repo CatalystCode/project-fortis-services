@@ -20,16 +20,29 @@ describe('Topics', function() {
 
       return topics.get(args)
         .then(function(response) {
-          console.log("response", response);
           expect(response).to.be.an('object');
         }).catch(function(err) {
-          console.log("WUTTT", err);
           expect(Boolean(err)).to.be.false;
         });
     });
 
   });
 
+  describe('#list(args)', function() {
 
+    it('should return an array', function() {
+      let args = {};
+      args.containerName = "settings";
+      args.blobName = "siteTypes/humanitarian/topics/defaultTopics.json";
+
+      return topics.list(args)
+        .then(function(response) {
+          expect(response).to.be.an('object');
+        }).catch(function(err) {
+          expect(Boolean(err)).to.be.false;
+        });
+    });
+
+  });
 
 });

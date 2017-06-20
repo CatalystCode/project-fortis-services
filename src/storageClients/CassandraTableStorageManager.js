@@ -55,11 +55,6 @@ Add app insights for reporting errors:
 Connecting to cassandra
 Failed storage mutations
 
-unit test with mocha
-and
-sinon
-  use mocks for connections to cassandra
-
 Disconnect from cassandra on error
 */
 
