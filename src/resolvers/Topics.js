@@ -7,11 +7,11 @@ module.exports = {
   get(args) {
     return new Promise((resolve, reject) => {
       blobStorageManager.Get(args.containerName, args.blobName, args.id)
-                .then(response => {
-                  resolve(response);
-                }).catch(err => {
-                  reject(err);
-                });
+        .then(response => {
+          resolve(response);
+        }).catch(err => {
+          reject(err);
+        });
     });
   },
   list(args) {

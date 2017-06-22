@@ -71,7 +71,7 @@ app.use('/api/settings', graphqlHTTP({
 }));
 
 app.use('/api/topics', graphqlHTTP({
-  schema: TopicsSchema, //TODO change to TopicsSchema
+  schema: TopicsSchema,
   rootValue: TopicsResolver,
   graphiql: true
 }));
