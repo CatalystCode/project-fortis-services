@@ -1,4 +1,4 @@
-const settings = require('../src/resolvers/Settings');
+/*const settings = require('../src/resolvers/Settings');
 const chai = require('chai');
 const expect = require('chai').expect;
 const Promise = require('bluebird');
@@ -8,6 +8,7 @@ const CONTAINER_NAME = 'settings';
 const SITE_TYPE = 'humanitarian';
 
 describe('Settings', function() {
+*/
   //only use below test if you commentted out insertorreplacesitedef
   /*
   describe('#createOrReplaceSite(args,res)', function() {
@@ -47,4 +48,4 @@ describe('Settings', function() {
   });
   */
 
-});
+//});

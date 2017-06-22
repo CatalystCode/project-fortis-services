@@ -4,7 +4,6 @@ const chai = require('chai');
 const expect = require('chai').expect;
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised); //TODO: see if you can move these test config to a new file see mocha docs
-const Promise = require('bluebird');
 
 const CASSANDRA_CONTACT_POINTS = process.env.CASSANDRA_CONTACT_POINTS;
 

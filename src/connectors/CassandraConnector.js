@@ -25,7 +25,7 @@ module.exports = {
         .catch((err) => {
           //console.error('There was an error when connecting to cluster with %d host(s): %j', client.hosts.length, client.hosts.keys, err);
             client.shutdown();
-            reject(null);
+            reject(err);
         });
         });
     },

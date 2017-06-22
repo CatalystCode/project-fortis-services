@@ -210,9 +210,9 @@ module.exports = {
             RowKey: siteDefinition.name
         });
 
-        tableService.createTableIfNotExists(AZURE_TBL_SITES, (error, result, response) => { // eslint-disable-line no-unused-vars
+        tableService.createTableIfNotExists(AZURE_TBL_SITES, (error, result) => { // eslint-disable-line no-unused-vars
             if(!error){
-                tableService.insertOrReplaceEntity(AZURE_TBL_SITES, tableEntity, (error2, result, response) => {
+                tableService.insertOrReplaceEntity(AZURE_TBL_SITES, tableEntity, (error2, result) => {
                     if(!error2){
                         FetchSiteDefinitions(siteDefinition.name, tableService, callback);
                     }else{

@@ -1,9 +1,7 @@
-const sinon = require('sinon');
 const cassandra = require('cassandra-driver');
 const cassandraTableStorageManager = require('../src/storageClients/CassandraTableStorageManager');
 const chai = require('chai');
-const expect = require('chai').expect;
-const Promise = require('bluebird');
+const expect = chai.expect;
 
 const queries = [
     {

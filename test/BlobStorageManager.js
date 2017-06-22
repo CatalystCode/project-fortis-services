@@ -3,7 +3,6 @@ const chai = require('chai');
 const expect = require('chai').expect;
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
-const Promise = require('bluebird');
 
 const CONTAINER_NAME = 'settings';
 const BLOB_NAME = 'siteTypes/humanitarian/topics/defaultTopics.json';

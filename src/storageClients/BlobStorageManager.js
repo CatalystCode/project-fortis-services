@@ -26,7 +26,6 @@ module.exports = {
     },
 
     List: function(containerName, blobNames) {
-        let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
         return new Promise((resolve, reject) => {
             Promise.all(getListPromises(containerName, blobNames))
         .then(itemsArrays => {

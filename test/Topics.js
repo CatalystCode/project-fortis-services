@@ -1,7 +1,6 @@
 const topics = require('../src/resolvers/Topics');
 const chai = require('chai');
-const expect = require('chai').expect;
-const Promise = require('bluebird');
+const expect = chai.expect;
 
 const CONTAINER_NAME = 'settings';
 const BLOB_NAME = 'siteTypes/humanitarian/topics/defaultTopics.json';
@@ -16,7 +15,6 @@ describe('Topics', function() {
             args.containerName = CONTAINER_NAME;
             args.blobName = BLOB_NAME;
             args.id = 1;
-            args.prefix = '';
 
             return topics.get(args)
         .then(function(response) {

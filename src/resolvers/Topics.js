@@ -1,7 +1,7 @@
 'use strict';
 
 const Promise = require('bluebird');
-const appInsights = require('applicationinsights');
+//const appInsights = require('applicationinsights');
 const blobStorageManager = require('../storageClients/BlobStorageManager');
 
 //appInsights.setup();

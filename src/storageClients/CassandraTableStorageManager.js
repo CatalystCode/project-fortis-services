@@ -1,6 +1,5 @@
 'use strict';
 
-const cassandraConnector = require('../connectors/CassandraConnector');
 const Promise = require('bluebird');
 
 const BATCH_LIMIT = 10;
