@@ -57,6 +57,7 @@ function InvokeServiceRequest(url, callback, featureCollection, bboxPolygon){
                 body.features.forEach(feature => {
                     const featureType = feature.properties.kind;
                     const coordinates = feature.geometry.coordinates;
+
                     if(featureType && PointFeatureInsideBBox(coordinates, bboxPolygon)
                                                && VALID_PLACE_KINDS.indexOf(featureType) > -1){
                         const population = feature.properties.population;
@@ -73,6 +74,7 @@ function InvokeServiceRequest(url, callback, featureCollection, bboxPolygon){
 
                         if(id && placeName && feature.geometry.type === 'Point'){
                             featureCollection.set(placeName, Object.assign({}, {
+
                                 coordinates: coordinates, id: id, source: feature.properties.source,
                                 name: placeName, name_ur: placeNameUr, name_id: placeNameId, name_ar: placeNameAr, name_de: placeNameDe, kind: feature.properties.kind,
                                 population: population, tileId: `${tileZ}_${tileY}_${tileX}`

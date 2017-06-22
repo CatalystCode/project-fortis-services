@@ -69,7 +69,7 @@ const PostgresStmtBatch = (stmtList, siteId, callback) => {
             postgresClient.connect(err => {
                 console.log(`processing ${stmtList.length} record write operations`);
                 if(!err){
-                    async.eachLimit(stmtList, PUSH_PARALLELISM, (stmt, cb)=>WritePostgresRecord(stmt, postgresClient, cb), err=>callback(siteDefinition.supportedLanguages, postgresClient, err));
+                    async.eachLimit(stmtList, PUSH_PARALLELISM, (stmt, cb)=>WritePostgresRecord(stmt, postgresClient, cb), err=>callback(siteDefinition.supportedLanguages, postgresClient, err));    
                 }else{
                     const errMsg = 'An error occured obtaining a postgres connection';
                     callback(siteDefinition.supportedLanguages, postgresClient, errMsg);
@@ -106,11 +106,11 @@ function QueryLocalities(languages, pgClient, callback){
                     'region': location.region || '',
                     'RowKey': location.rowkey.toString()
                 };
-
+                    
                 nameFieldNames.forEach(nameFieldName => {
                     mutatedLocation[nameFieldName] = location[nameFieldName];
                 });
-
+              
                 return mutatedLocation;
             });
 
@@ -148,7 +148,7 @@ function FetchPopularTerms(site, additionalEdge, limit, fromDate, toDate, zoomLe
                                ${sourceFilter && sourceFilter.length > 0 ? ` AND source IN('${sourceFilter.join('\',\'')}')` : ''}
                              GROUP BY keyword
                           ORDER BY mentions desc
-                          LIMIT ${limit}`;
+                          LIMIT ${limit}`;               
         }
 
         console.log(query);
@@ -156,7 +156,6 @@ function FetchPopularTerms(site, additionalEdge, limit, fromDate, toDate, zoomLe
             if(!error){
                 PostgresService(siteDefinition.featuresConnectionString, query, (error, results) => {
                     if(!error){
-
 
                         let response = {
                             'edges': results.rows.map(item => Object.assign({}, {
@@ -190,11 +189,11 @@ function TilesFetchInnerQueryWithFilters(keyword, selectClause, whereClause, fil
                       WHERE ${whereClause}
                          AND keyword = '${keyword}'
                          AND layer IN('${filteredEdges.join('\',\'')}')
-                      UNION
+                      UNION 
                       SELECT ${selectClause}, keyword as edge
                       FROM tiles
                       WHERE ${whereClause}
-                          AND layer = '${keyword}'
+                          AND layer = '${keyword}' 
                           AND keyword IN('${filteredEdges.join('\',\'')}')`;
 
     return innerQuery;
@@ -227,7 +226,6 @@ module.exports = {
             if(!error){
                 PostgresService(siteDefinition.featuresConnectionString, query, (error, results) => {
                     if(!error){
-
                         let sentencesResponse = {
                             'type': 'FeatureCollection',
                             'bbox': bbox,
@@ -387,7 +385,7 @@ module.exports = {
         //Removing these data sources as the original_sources was originally backfilled with these values when the field was introduced.
         const invalidDataSources = ['{facebook-messages}', '{facebook-comments}', '{twitter}', '{acled}', '{tadaweb}'];
         const query = ` select original_sources, count(*), source
-                        from tilemessages where original_sources not in('${invalidDataSources.join('\',\'')}')
+                        from tilemessages where original_sources not in('${invalidDataSources.join('\',\'')}') 
                             ${sourceFilter && sourceFilter.length > 0 ? ` and source IN('${sourceFilter.join('\',\'')}') ` : ''}
                             ${mainTerm && mainTerm.length > 0 ? ` and array['${mainTerm}'] && keywords`: ''}
                             and createdtime <= '${toDate}' and createdtime >= '${fromDate}'
@@ -464,7 +462,6 @@ group by original_sources;`;
                        FROM tilemessages
                        WHERE createdtime <= '${toDate}' and createdtime >= '${fromDate}'
                             ${sourceFilter && sourceFilter.length > 0 ? ` AND source IN('${sourceFilter.join('\',\'')}')` : ''}`;
-
                 PostgresService(siteDefinition.featuresConnectionString, query, (error, results) => {
                     if (!error) {
                         const topicsResponse = results.rows.map(row => Object.assign({}, {'type': 'Term', 'name': row.topics, 'RowKey': row.topics}));
@@ -495,8 +492,6 @@ group by original_sources;`;
                             ${bbox ? ` and tiles.geog && ST_MakeEnvelope(${bbox.join(', ')}, 4326)` : ''}
                             ${sourceFilter && sourceFilter.length > 0 ? ` AND source IN('${sourceFilter.join('\',\'')}')` : ''}
                             ${zoomLevel ? ` and zoom = ${zoomLevel}` : ''}`;
-
-
             let selectClause = 'geog, neg_sentiment, pos_sentiment, mentions, tileid';
             let query, innerQuery, fromClause;
 
@@ -626,7 +621,7 @@ group by original_sources;`;
                                     ${fromDate && toDate ? ` AND perioddate between '${fromDate}' and '${toDate}' and periodtype='hour'` : ` and period = '${timespan}'`}
                                     and layertype = '${layertype}' and keyword is not null and layer = 'none'
                                     ${sourceFilter && sourceFilter.length > 0 ? ` AND source IN('${sourceFilter.join('\',\'')}')` : ''}
-                                GROUP BY geog, tileid) a) locations,
+                                GROUP BY geog, tileid) a) locations, 
                                 localities b
                          WHERE locations.location_name = b.name
                          GROUP BY location_name, b.geog, population

@@ -6,18 +6,18 @@ var http = require('http');
 var express = require('express');
 var bodyParser = require('body-parser');
 var graphqlHTTP = require('express-graphql');
-var SpatialMessageSchema = require("./src/schemas/MessageSchema");
-var SpatialMessageResolver = require("./src/resolvers/Messages");
-var FactsSchema = require("./src/schemas/FactSchema");
-var FactsResolver = require("./src/resolvers/Facts");
-var TileSchema = require("./src/schemas/TilesSchema");
-var TileResolver = require("./src/resolvers/Tiles");
-var EdgesSchema = require("./src/schemas/EdgesSchema");
-var EdgesResolver = require("./src/resolvers/Edges");
-var SettingsResolver = require("./src/resolvers/Settings");
-var SettingsSchema = require("./src/schemas/SettingsSchema");
-var TopicsSchema = require("./src/schemas/TopicsSchema");
-var TopicsResolver = require("./src/resolvers/Topics");
+var SpatialMessageSchema = require('./src/schemas/MessageSchema');
+var SpatialMessageResolver = require('./src/resolvers/Messages');
+var FactsSchema = require('./src/schemas/FactSchema');
+var FactsResolver = require('./src/resolvers/Facts');
+var TileSchema = require('./src/schemas/TilesSchema');
+var TileResolver = require('./src/resolvers/Tiles');
+var EdgesSchema = require('./src/schemas/EdgesSchema');
+var EdgesResolver = require('./src/resolvers/Edges');
+var SettingsResolver = require('./src/resolvers/Settings');
+var SettingsSchema = require('./src/schemas/SettingsSchema');
+var TopicsSchema = require('./src/schemas/TopicsSchema');
+var TopicsResolver = require('./src/resolvers/Topics');
 
 var app = express();
 
@@ -71,9 +71,9 @@ app.use('/api/settings', graphqlHTTP({
 }));
 
 app.use('/api/topics', graphqlHTTP({
-  schema: TopicsSchema, //TODO change to TopicsSchema
-  rootValue: TopicsResolver,
-  graphiql: true,
+    schema: TopicsSchema, //TODO change to TopicsSchema
+    rootValue: TopicsResolver,
+    graphiql: true
 }));
 
 var server = http.createServer(app);

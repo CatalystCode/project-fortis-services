@@ -212,7 +212,7 @@ module.exports = {
 
         tableService.createTableIfNotExists(AZURE_TBL_SITES, (error, result, response) => { // eslint-disable-line no-unused-vars
             if(!error){
-                 tableService.insertOrReplaceEntity(AZURE_TBL_SITES, tableEntity, (error2, result, response) => {
+                tableService.insertOrReplaceEntity(AZURE_TBL_SITES, tableEntity, (error2, result, response) => {
                     if(!error2){
                         FetchSiteDefinitions(siteDefinition.name, tableService, callback);
                     }else{

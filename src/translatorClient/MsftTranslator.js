@@ -61,7 +61,6 @@ function TranslateSentenceArray(access_token, wordsToTranslate, fromLanguage, to
 
     const text = `<Texts>${wordsToTranslate.map(text=>`<string xmlns='http://schemas.microsoft.com/2003/10/Serialization/Arrays'>${text}</string>`).join('')}</Texts>`;
     const requestXML = `<TranslateArrayRequest><AppId/><From>${fromLanguage}</From>${text}<To>${toLanguage}</To></TranslateArrayRequest>`;
-
     const POST = {
         url: translator_array_uri,
         headers: headers,

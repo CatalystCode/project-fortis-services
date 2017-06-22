@@ -1,14 +1,14 @@
-'use strict'
+'use strict';
 const Promise = require('bluebird');
-const azureTableService = Promise.promisifyAll(require("../storageClients/AzureTableStorageManager"));
-const postgresMessageService = require("../postgresClients/PostgresLocationManager");
-const blobStorageManager = require("../storageClients/BlobStorageManager");
-const cassandraTableStorageManager = require("../storageClients/CassandraTableStorageManager");
-const cassandraConnector = require("../connectors/CassandraConnector");
+const azureTableService = Promise.promisifyAll(require('../storageClients/AzureTableStorageManager'));
+const postgresMessageService = require('../postgresClients/PostgresLocationManager');
+const blobStorageManager = require('../storageClients/BlobStorageManager');
+const cassandraTableStorageManager = require('../storageClients/CassandraTableStorageManager');
+const cassandraConnector = require('../connectors/CassandraConnector');
 
-const DEFAULT_LANGUAGE = "en";
+const DEFAULT_LANGUAGE = 'en';
 
-const TOPICS_SEED_CONTAINER = "settings";
+const TOPICS_SEED_CONTAINER = 'settings';
 
 module.exports = {
     sites(args, res){ // eslint-disable-line no-unused-vars
@@ -29,36 +29,36 @@ module.exports = {
         });
     },
 
-  createOrReplaceSite(args, res){
-    const siteDefinition = args.input;
-    const siteType = siteDefinition.siteType;
+    createOrReplaceSite(args, res){
+        const siteDefinition = args.input;
+        const siteType = siteDefinition.siteType;
 
-    return new Promise((resolve, reject) => {
-      if(siteType && siteType.length > 0) {
-        cassandraConnector.openClient()
+        return new Promise((resolve, reject) => {
+            if(siteType && siteType.length > 0) {
+                cassandraConnector.openClient()
           .then((client) => {
-            return insertSeedTopics(client, siteType)
+              return insertSeedTopics(client, siteType);
           })
           .then(() => {
-            return azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition);
+              return azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition);
           })
           .then(result => {
-            resolve(result && result.length > 0 ? result[0] : {});
+              resolve(result && result.length > 0 ? result[0] : {});
           })
           .catch(err => {
-            reject(err);
+              reject(err);
           });
-      } else {
-        azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition)
+            } else {
+                azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition)
           .then(result => {
-            resolve(result && result.length > 0 ? result[0] : {});
+              resolve(result && result.length > 0 ? result[0] : {});
           })
           .catch(err => {
-            reject(err);
+              reject(err);
           });
-      }
-    });
-  },
+            }
+        });
+    },
 
     modifyFacebookPages(args, res){
         const startTime = Date.now();
@@ -301,29 +301,29 @@ module.exports = {
 };
 
 let insertSeedTopics = (client, siteType) => {
-  return new Promise((resolve, reject) => {
-     blobStorageManager.getBlobNamesWithSiteType(TOPICS_SEED_CONTAINER, siteType)
+    return new Promise((resolve, reject) => {
+        blobStorageManager.getBlobNamesWithSiteType(TOPICS_SEED_CONTAINER, siteType)
        .then(blobNames => {
-         return blobStorageManager.List(TOPICS_SEED_CONTAINER, blobNames)
+           return blobStorageManager.List(TOPICS_SEED_CONTAINER, blobNames);
        })
        .then(blobsTopics => {
-         return blobsTopics.collection;
+           return blobsTopics.collection;
        })
        .then(topics => {
-         let queries = [];
-         for(let topic of topics) {
-           queries.push(cassandraTableStorageManager.prepareInsertTopic(topic));
-         }
-         return queries;
+           let queries = [];
+           for(let topic of topics) {
+               queries.push(cassandraTableStorageManager.prepareInsertTopic(topic));
+           }
+           return queries;
        })
        .then(queries => {
-         return cassandraTableStorageManager.batch(client, queries);
+           return cassandraTableStorageManager.batch(client, queries);
        })
        .then(() => {
-         resolve();
+           resolve();
        })
        .catch(err => {
-         reject(err);
+           reject(err);
        });
-  });
-}
+    });
+};
