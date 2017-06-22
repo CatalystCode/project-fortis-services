@@ -1,30 +1,45 @@
 "use strict"
 
-const cassandra = require('cassandra-driver');
+const Promise = require("bluebird");
+const cassandra = Promise.promisifyAll(require('cassandra-driver'));
 
-const CASSANDRA_CONTACT_POINTS = ['1.2.3.4']; //TODO: get from env var
+const CASSANDRA_CONTACT_POINTS = process.env.CASSANDRA_CONTACT_POINTS;
 
 const options = {
-  contactPoints:CASSANDRA_CONTACT_POINTS
-
+  contactPoints: [CASSANDRA_CONTACT_POINTS],
+  keyspace: process.env.CASSANDRA_KEYSPACE
 };
 
 module.exports = {
-  getClient: function (contactPoints, keyspace) {
-    const client = new cassandra.Client({ contactPoints: contactPoints, keyspace: keyspace }); //http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/
 
-    client.connect(function (err) {
-      if (err) return console.error(err);
-      console.log('Connected to cluster with %d host(s): %j', client.hosts.length, client.hosts.keys);
+  openClient: function () {
+    const client = new cassandra.Client(options);
+
+    return new Promise((resolve, reject) => {
+      client.connect()
+        .then(() => {
+          //console.log('Connected to cluster with %d host(s): %j', client.hosts.length, client.hosts.keys);
+          //console.log('Keyspaces: %j', Object.keys(client.metadata.keyspaces));
+          resolve(client);
+        })
+        .catch((err) => {
+          //console.error('There was an error when connecting to cluster with %d host(s): %j', client.hosts.length, client.hosts.keys, err);
+          client.shutdown();
+          reject(null);
+        });
+    });
+  },
+
+  closeClient: function(client) {
+    return new Promise((resolve, reject) => {
+      client.shutdown()
+        .then(() => {
+          resolve();
+        })
+        .catch((err) => {
+          //console.error('There was an error shutting down the client');
+          reject(err);
+        });
     });
   }
 }
-
-/* TODO ***********************************
-Add app insights for reporting errors:
-Connecting to cassandra
-Failed storage mutations
-*/
-
-//let appInsights = require("applicationinsights");
-//let appInsightsClient = appInsights.getClient();

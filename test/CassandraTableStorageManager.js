@@ -1,26 +1,51 @@
-let assert = require('assert');
-let sinon = require('sinon');
+const sinon = require('sinon');
 const cassandra = require('cassandra-driver');
-let cassandraTableStorageManager = require("../src/storageClients/CassandraTableStorageManager");
-let cassandraConnector = require("../src/connectors/CassandraConnector");
+const cassandraTableStorageManager = require("../src/storageClients/CassandraTableStorageManager");
+const chai = require("chai");
+const expect = require('chai').expect;
+const Promise = require("bluebird");
 
-/*
+const queries = [
+  {
+    query: 'INSERT INTO Topics (id, topic, value) VALUES (?, ?, ?)',
+    params: [ 1, "toxin", "en" ]
+  },
+  {
+    query: 'INSERT INTO Topics (id, topic, value) VALUES (?, ?, ?)',
+    params: [ 2, "pollution", "en" ]
+  }
+];
+
+const CASSANDRA_CONTACT_POINTS = process.env.CASSANDRA_CONTACT_POINTS;
+
 describe('CassandraTableStorageManager', function() {
 
-  describe('#insert(siteType, items)', function() {
+  describe('#batch(queries)', function() {
+    const options = {
+      contactPoints: [CASSANDRA_CONTACT_POINTS],
+      keyspace: process.env.CASSANDRA_KEYSPACE
+    };
+    const client = new cassandra.Client(options);
 
-    it('Cassandra client should insert items without error', function(done) {
-      cassandraTableStorageManager.insert('humanitarian', [{RowKey: 1, name: 'topic1', value: 'topic2'}], done)
+    it('Cassandra client should insert items in batches without error', function() {
+      return expect(cassandraTableStorageManager.batch(client, queries)).to.eventually.be.fulfilled;
     });
+
+  });
+
+  describe('#prepareInsertTopic(topic)', function() {
+
+    it('Prepares the query object without error', function() {
+
+      let topic = {
+        id: 1,
+        topic: "health",
+        value: "en"
+      }
+
+      return expect(cassandraTableStorageManager.prepareInsertTopic(topic)).to.have.property('query')
+    });
+
   });
 
 });
-*/
-
-/*    it('should call getClient once', function() {
-      var client = sinon.spy(cassandraConnector, 'getClient');
-
-      cassandraTableStorageManager.insert('humanitarian', [{RowKey: 1, name: 'topic1', value: 'topic2'}])
-
-      sinon.assert.calledOnce(client);
-    });*/

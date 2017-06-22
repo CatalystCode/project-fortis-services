@@ -1,22 +1,23 @@
 "use strict"
 
-//can i take the promise off here? below
-var Promise = require("bluebird");
-
+const Promise = require("bluebird");
 const azure = Promise.promisifyAll(require('azure-storage'));
 
-//TODO: remove hardcoded const values:
-const CONTAINER_NAME = "settings";
-const CONTAINER_STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=fortiscentral;AccountKey=Vwbsz5N5rvGJc9eXjmqbkD20yFod4CaNa131pQf2o5Els3xsEzYo4UI4nl2KaBypNMLBlHXewJPWYEVghSICCg==;EndpointSuffix=core.windows.net";
+const BLOB_STORAGE_CONNECTION_STRING = process.env.BLOB_STORAGE_CONNECTION_STRING;
 
 module.exports = {
 
   Get: function(containerName, blobName, id) {
-    let blobSvc = azure.createBlobService(CONTAINER_STORAGE_CONNECTION_STRING);
+    let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
     return new Promise((resolve, reject) => {
       blobSvc.getBlobToTextAsync(containerName, blobName, null)
         .then(text => {
-          resolve(JSON.parse(text)[id]);
+          let item = JSON.parse(text)[id];
+          if(item) {
+            resolve(JSON.parse(text)[id]);
+          } else {
+            resolve(null);
+          }
         })
         .catch(err => {
           reject(err);
@@ -24,15 +25,27 @@ module.exports = {
     });
   },
 
-  List: function(containerName, blobName) {
-    let blobSvc = azure.createBlobService(CONTAINER_STORAGE_CONNECTION_STRING);
+  List: function(containerName, blobNames) {
+    let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
     return new Promise((resolve, reject) => {
-      blobSvc.getBlobToTextAsync(containerName, blobName, null)
-        .then(text => {
-          return JSON.parse(text);
+      Promise.all(getListPromises(containerName, blobNames))
+        .then(itemsArrays => {
+          let mergedItems = [].concat.apply([], itemsArrays);
+          let list = {'collection': mergedItems};
+          resolve(list);
         })
-        .then(list => {
-          resolve({'collection': list});
+        .catch(err => {
+          reject(err);
+        });
+    });
+  },
+
+  getBlobNamesWithSiteType: function(containerName, siteType) {
+    return new Promise((resolve, reject) => {
+      listBlobsInContainer(containerName)
+        .then(blobNames => {
+          blobNames = blobNames.filter(blobNames => (blobNames.indexOf(siteType) > -1));
+          resolve(blobNames);
         })
         .catch(err => {
           reject(err);
@@ -40,4 +53,38 @@ module.exports = {
     });
   }
 
+}
+
+let getListPromises = (containerName, blobNames) => {
+  let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
+  let listPromises = [];
+  for ( let blobName of blobNames ) {
+    listPromises.push(
+      new Promise((resolve, reject) => {
+        blobSvc.getBlobToTextAsync(containerName, blobName, null)
+          .then(JSON.parse)
+          .then(list => {
+            resolve(list);
+          })
+          .catch(err => {
+            reject(err);
+          });
+      })
+    );
+  }
+  return listPromises;
+}
+
+let listBlobsInContainer = containerName => {
+  let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
+  return new Promise((resolve, reject) => {
+    blobSvc.listBlobsSegmentedAsync(containerName, null)
+      .then(blobs => {
+        blobs.entries = blobs.entries.map(blob => blob.name);
+        resolve(blobs.entries);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
 }

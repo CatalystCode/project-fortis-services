@@ -200,6 +200,7 @@ module.exports = {
     },
 
     InsertOrReplaceSiteDefinition(siteDefinition, callback){
+
         let tableService = azureStorage.createTableService();
         const tableEntity = Object.assign({}, siteDefinition, {
             defaultLocation: JSON.stringify(siteDefinition.defaultLocation),

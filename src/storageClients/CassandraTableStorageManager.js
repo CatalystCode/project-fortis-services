@@ -1,62 +1,49 @@
-"use strict"
-
-let asyncEachLimit = require('async/eachLimit');
-const ASYNC_INSERT_LIMIT = 10;
+'use strict'
 
 const cassandraConnector = require("../connectors/CassandraConnector");
+const Promise = require("bluebird");
 
-const CONTACT_POINTS = ['h1','h2'];
-const KEYSPACE = 'ks1';
-
-function processInsert(client, siteType, item, asyncCB) {
-  const query = `INSERT INTO Topics (id, name, value) VALUES (?, ?, ?)`;
-  const params = [ 1, "humanitarian aid", siteType ];
-
-  // 1
-  client.execute(query, params, { prepare: true })
-    .then(result => console.log('inserted row with ' + params[0] + params[1] + params[2]));
-
-  // 2
-  const queries = [
-    {
-      query: 'UPDATE user_profiles SET email=? WHERE key=?',
-      params: [ emailAddress, 'hendrix' ]
-    },
-    {
-      query: 'INSERT INTO user_track (key, text, date) VALUES (?, ?, ?)',
-      params: [ 'hendrix', 'Changed email', new Date() ]
-    }
-  ];
-  client.batch(queries, { prepare: true })
-    .then(result => console.log('Data updated on cluster'));
-}
+const BATCH_LIMIT = 10;
 
 module.exports = {
-  //TODO: can I generalize this beyond topics?
-  insert: function(siteType, items){
-    const client = cassandraConnector.getClient(CONTACT_POINTS, KEYSPACE);
 
-    /*if db only allows a limited number of connections at a time*/
-    asyncEachLimit(items, ASYNC_INSERT_LIMIT, (siteType, item, asyncCB) => processInsert(client, siteType, item, asyncCB), finalCBErr => {
-      let processedInserts;
-      if(finalCBErr){
-        console.error(`Error occured inserting items into Topics table: ${JSON.stringify(finalCBErr)}`);
-      }else{
-        console.log(`Finished writing ${items.length} to Topics table`);
-        processedInserts = items.map(item => item.RowKey);
-      }
-        callback(finalCBErr, processedInserts);
+  prepareInsertTopic: function(topic) { //TODO: the insert statement to reflect the final topic schema
+    return {
+      query: 'INSERT INTO topics (id, topic, value) VALUES (?, ?, ?)',
+      params: [ topic.id, topic.topic, topic.value ]
+    };
+  },
+
+  batch: function(client, queries){
+    return new Promise((resolve, reject) => {
+      Promise.all(getBatchPromises(client, queries))
+        .then(res => {
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
   }
+
 }
 
-/* TODO ***********************************
-Add app insights for reporting errors:
-Connecting to cassandra
-Failed storage mutations
+let getBatchPromises = (client, queries) => {
+  let insertPromises = [];
+  for ( let i = 0, j = queries.length; i < j; i += BATCH_LIMIT ) {
+    insertPromises.push(
+      new Promise((resolve, reject) => {
+        client.batch(queries.slice(i, i + BATCH_LIMIT), { prepare: true })
+          .then(res => {
+            resolve(res);
+          })
+          .catch(err => {
+            reject(err);
+          });
+      })
+    );
+  }
+  return insertPromises;
+}
 
-Disconnect from cassandra on error
-*/
 
-//let appInsights = require("applicationinsights");
-//let appInsightsClient = appInsights.getClient();

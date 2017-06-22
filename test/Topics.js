@@ -1,11 +1,11 @@
-let topics = require("../src/resolvers/Topics");
-var chai = require("chai");
-chai.should();
-let expect = require('chai').expect;
-let Promise = require('promise');
+const topics = require("../src/resolvers/Topics");
+const chai = require("chai");
+const expect = require('chai').expect;
+const Promise = require("bluebird");
 
 const CONTAINER_NAME = "settings";
-
+const BLOB_NAME = "siteTypes/humanitarian/topics/defaultTopics.json";
+const BLOB_NAMES = ["siteTypes/humanitarian/topics/defaultTopics.json", "siteTypes/health/topics/defaultTopics.json"]
 
 describe('Topics', function() {
 
@@ -13,8 +13,8 @@ describe('Topics', function() {
 
     it('should return a single item', function() {
       let args = {};
-      args.containerName = "settings";
-      args.blobName = "siteTypes/humanitarian/topics/defaultTopics.json";
+      args.containerName = CONTAINER_NAME;
+      args.blobName = BLOB_NAME;
       args.id = 1;
       args.prefix = "";
 
@@ -30,14 +30,14 @@ describe('Topics', function() {
 
   describe('#list(args)', function() {
 
-    it('should return an array', function() {
+    it('should return an object with key collection', function() {
       let args = {};
-      args.containerName = "settings";
-      args.blobName = "siteTypes/humanitarian/topics/defaultTopics.json";
+      args.containerName = CONTAINER_NAME;
+      args.blobName = BLOB_NAMES;
 
       return topics.list(args)
         .then(function(response) {
-          expect(response).to.be.an('object');
+          expect(response).to.be.an('object').that.has.all.keys('collection');
         }).catch(function(err) {
           expect(Boolean(err)).to.be.false;
         });

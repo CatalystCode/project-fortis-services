@@ -1,11 +1,12 @@
 "use strict"
 
-let Promise = require('promise');
-var appInsights = require('applicationinsights');
+const Promise = require("bluebird");
+const appInsights = require('applicationinsights');
+const blobStorageManager = require("../storageClients/BlobStorageManager");
+
 //appInsights.setup();
 //appInsights.client.config.samplingPercentage = 0; // 0% of all telemetry will be sent to Application Insights 
 //appInsights.start();
-let blobStorageManager = require("../storageClients/BlobStorageManager");
 
 module.exports = {
   get(args) {
