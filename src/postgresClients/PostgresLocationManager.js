@@ -502,7 +502,7 @@ group by original_sources;`;
       }
 
       fromClause = `SELECT features.geog, tileid, SUM(mentions*pos_sentiment) as pos_wavg, sum(mentions) as mentions,
-				                 SUM(mentions*neg_sentiment) as neg_wavg
+                         SUM(mentions*neg_sentiment) as neg_wavg
                           FROM (${fromClause}) features
                           GROUP BY geog, tileid`;
 
@@ -555,15 +555,15 @@ group by original_sources;`;
       let query, innerQuery, fromClause;
 
       fromClause = `SELECT geog, neg_sentiment, pos_sentiment, mentions, tileid, keyword as edge
-					      FROM tiles
-					      WHERE mentions > 0 and layertype = '${layertype}' and layer = 'none'
+                FROM tiles
+                WHERE mentions > 0 and layertype = '${layertype}' and layer = 'none'
                             and tileid IN('${tileIds.join('\',\'')}')
                           ${fromDate && toDate ? ` AND perioddate between '${fromDate}' and '${toDate}' and periodtype='hour'` : ` and period = '${timespan}'`}
                           ${sourceFilter && sourceFilter.length > 0 ? ` AND source IN('${sourceFilter.join('\',\'')}')` : ''}
                           ${edgeFilters.length === 0 ? ' and keyword is not null ': ` and keyword IN('${edgeFilters.join('\',\'')}')`}`;
 
       fromClause = `SELECT features.geog, tileid, SUM(mentions*pos_sentiment) as pos_wavg, sum(mentions) as mentions,
-				                 SUM(mentions*neg_sentiment) as neg_wavg
+                         SUM(mentions*neg_sentiment) as neg_wavg
                           FROM (${fromClause}) features
                           GROUP BY geog, tileid`;
 
