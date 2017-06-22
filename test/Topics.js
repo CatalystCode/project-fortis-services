@@ -1,5 +1,5 @@
 const topics = require('../src/resolvers/Topics');
-const chai = require('chai');
+const chai = require('chai');
 const expect = chai.expect;
 
 const CONTAINER_NAME = 'settings';

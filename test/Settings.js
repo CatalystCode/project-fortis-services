@@ -1,5 +1,5 @@
 /*const settings = require('../src/resolvers/Settings');
-const chai = require('chai');
+const chai = require('chai');
 const expect = require('chai').expect;
 const Promise = require('bluebird');
 const cassandra = require('cassandra-driver');

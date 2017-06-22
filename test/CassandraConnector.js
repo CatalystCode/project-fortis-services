@@ -1,8 +1,8 @@
 const cassandra = require('cassandra-driver');
 const cassandraConnector = require('../src/connectors/CassandraConnector');
-const chai = require('chai');
+const chai = require('chai');
 const expect = require('chai').expect;
-const chaiAsPromised = require('chai-as-promised');
+const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised); //TODO: see if you can move these test config to a new file see mocha docs
 
 const CASSANDRA_CONTACT_POINTS = process.env.CASSANDRA_CONTACT_POINTS;

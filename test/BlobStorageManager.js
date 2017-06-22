@@ -1,7 +1,7 @@
 const blobStorageManager = require('../src/storageClients/BlobStorageManager');
-const chai = require('chai');
-const expect = require('chai').expect;
-const chaiAsPromised = require('chai-as-promised');
+const chai = require('chai');
+const expect = chai.expect;
+const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 const CONTAINER_NAME = 'settings';

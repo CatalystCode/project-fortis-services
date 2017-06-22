@@ -1,6 +1,6 @@
 const cassandra = require('cassandra-driver');
 const cassandraTableStorageManager = require('../src/storageClients/CassandraTableStorageManager');
-const chai = require('chai');
+const chai = require('chai');
 const expect = chai.expect;
 
 const queries = [
@@ -26,7 +26,7 @@ describe('CassandraTableStorageManager', function() {
     const client = new cassandra.Client(options);
 
     it('Cassandra client should insert items in batches without error', function() {
-      return expect(cassandraTableStorageManager.batch(client, queries)).to.eventually.be.fulfilled;
+      return expect(cassandraTableStorageManager.batch(client, queries)).to.eventually.be.fulfilled;
     });
 
   });
