@@ -27,7 +27,7 @@ module.exports = {
         });
     },
 
-    createOrReplaceSite(args, res){
+    createOrReplaceSite(args, res){  // eslint-disable-line no-unused-vars
         const siteDefinition = args.input;
         const siteType = siteDefinition.siteType;
 
@@ -58,7 +58,7 @@ module.exports = {
         });
     },
 
-    modifyFacebookPages(args, res){
+    modifyFacebookPages(args, res){  // eslint-disable-line no-unused-vars
         const startTime = Date.now();
         const inputDefinition = args.input;
         const fbPages = inputDefinition.pages.map(page => Object.assign({}, page, {PartitionKey: {'_': inputDefinition.site}, RowKey: {'_': page.RowKey}}));

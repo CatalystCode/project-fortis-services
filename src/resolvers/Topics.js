@@ -5,7 +5,7 @@ const Promise = require('bluebird');
 const blobStorageManager = require('../storageClients/BlobStorageManager');
 
 //appInsights.setup();
-//appInsights.client.config.samplingPercentage = 0; // 0% of all telemetry will be sent to Application Insights 
+//appInsights.client.config.samplingPercentage = 0;
 //appInsights.start();
 
 module.exports = {
