@@ -1,22 +1,17 @@
 'use strict';
 
 const Promise = require('bluebird');
-//const appInsights = require('applicationinsights');
 const blobStorageManager = require('../storageClients/BlobStorageManager');
-
-//appInsights.setup();
-//appInsights.client.config.samplingPercentage = 0;
-//appInsights.start();
 
 module.exports = {
     get(args) {
         return new Promise((resolve, reject) => {
             blobStorageManager.Get(args.containerName, args.blobName, args.id)
-        .then(response => {
-            resolve(response);
-        }).catch(err => {
-            reject(err);
-        });
+                .then(response => {
+                    resolve(response);
+                 }).catch(err => {
+                    reject(err);
+                 });
         });
     },
     list(args) {
