@@ -201,7 +201,7 @@ module.exports = {
 
     InsertOrReplaceSiteDefinition(siteDefintion, callback){
         let tableService = azureStorage.createTableService();
-        const tableEnity = Object.assign({}, siteDefintion, {
+        const tableEntity = Object.assign({}, siteDefintion, {
             defaultLocation: JSON.stringify(siteDefintion.defaultLocation),
             targetBbox: JSON.stringify(siteDefintion.targetBbox),
             supportedLanguages: JSON.stringify(siteDefintion.supportedLanguages),
@@ -211,11 +211,11 @@ module.exports = {
 
         tableService.createTableIfNotExists(AZURE_TBL_SITES, (error, result, response) => { // eslint-disable-line no-unused-vars
             if(!error){
-                tableService.insertOrReplaceEntity(AZURE_TBL_SITES, tableEnity, (error2, result, response) => { // eslint-disable-line no-unused-vars
+                 tableService.insertOrReplaceEntity(AZURE_TBL_SITES, tableEntity, (error2, result, response) => {
                     if(!error2){
                         FetchSiteDefinitions(siteDefintion.name, tableService, callback);
                     }else{
-                        callback(`There was an error writing to table [${AZURE_TBL_SITES}] with definition[${JSON.stringify(tableEnity)}]`);
+                        callback(`There was an error writing to table [${AZURE_TBL_SITES}] with definition[${JSON.stringify(tableEntity)}]`);
                     }
                 });
             }else{
