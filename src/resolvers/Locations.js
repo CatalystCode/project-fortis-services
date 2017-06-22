@@ -9,30 +9,30 @@ let Promise = require('promise');
 let postgresMessageService = require('../postgresClients/PostgresLocationManager');
 
 module.exports = {
-    popularLocations(args, res){ // eslint-disable-line no-unused-vars
-        const startTime = Date.now();
+  popularLocations(args, res){ // eslint-disable-line no-unused-vars
+    const startTime = Date.now();
 
-        let requestedLanguage = args.langCode || DEFAULT_LANGUAGE;
-        let site = args.site;
-        let timespan = args.timespan;
-        let fromDate = args.fromDate;
-        let toDate = args.toDate;
-        let sourceFilter = args.sourceFilter;
-        let limit = args.limit || DEFAULT_LIMIT;
-        let zoom = args.zoomLevel || DEFAULT_ZOOM_LEVEL;
-        let layertype = args.layertype || DEFAULT_LAYER_TYPE;
+    let requestedLanguage = args.langCode || DEFAULT_LANGUAGE;
+    let site = args.site;
+    let timespan = args.timespan;
+    let fromDate = args.fromDate;
+    let toDate = args.toDate;
+    let sourceFilter = args.sourceFilter;
+    let limit = args.limit || DEFAULT_LIMIT;
+    let zoom = args.zoomLevel || DEFAULT_ZOOM_LEVEL;
+    let layertype = args.layertype || DEFAULT_LAYER_TYPE;
 
-        return new Promise((resolve, reject) => {
-            postgresMessageService.FetchPopularLocations(site, requestedLanguage, limit, timespan, zoom, layertype, sourceFilter, fromDate, toDate,
+    return new Promise((resolve, reject) => {
+      postgresMessageService.FetchPopularLocations(site, requestedLanguage, limit, timespan, zoom, layertype, sourceFilter, fromDate, toDate,
                     (error, results) => {
-                        if(error){
-                            let errorMsg = `Internal location server error: [${JSON.stringify(error)}]`;
-                            reject(errorMsg);
-                        }else{
-                            let messages = Object.assign({}, results, {runTime: Date.now() - startTime});
-                            resolve(messages);
-                        }
+                      if(error){
+                        let errorMsg = `Internal location server error: [${JSON.stringify(error)}]`;
+                        reject(errorMsg);
+                      }else{
+                        let messages = Object.assign({}, results, {runTime: Date.now() - startTime});
+                        resolve(messages);
+                      }
                     });
-        });
-    }
+    });
+  }
 };
