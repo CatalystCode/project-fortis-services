@@ -24,6 +24,7 @@ module.exports = {
     },
     createOrReplaceSite(args, res){
         const siteDefinition = args.input;
+        const siteType = siteDefinition.siteType;
 
         return new Promise((resolve, reject) => {
             azureTableService.InsertOrReplaceSiteDefinition(siteDefinition,
@@ -32,6 +33,28 @@ module.exports = {
                             let errorMsg = `Internal location server error: [${JSON.stringify(error)}]`;
                             reject(errorMsg);
                         }else{
+                            /*
+                            Only thing worth adding is that you’ll need to write the keyword entries into Cassandra from
+                            the create site resolver function. Check out some the storageClient examples on how we’re doing
+                            storage writes for Postgres and Azure table as examples. You can use Datastax node-js driver to
+                             manage the communication between graphql and Cassandra https://github.com/datastax/nodejs-driver .
+                             Also, the input type SiteDefinition will now accept an additional parameter called siteType.
+                             You should only invoke the topic persistence step if that attribute is provided, as this will only be
+                             provided when the deployment script invokes this service.
+                            The Admin interface will never define this attribute, as its intent is to
+                            infer which keywords to pre-populate the site with.
+                            */
+                            if(siteType && siteType.length > 0){
+                               /*
+                               Get data from blob storage but just for the one that is associated with the siteType!
+                               accept the siteType input parameter and reference all topics for the input {type} from blob storage.
+                               Store data into cassandra tables - Push one record in the Topics table in Cassandra
+                               for each topic sourced from our blob storage container.
+                               */
+
+
+                            }
+
                             resolve(result && result.length > 0 ? result[0] : {});
                         }
                     });
