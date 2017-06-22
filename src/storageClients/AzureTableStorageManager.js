@@ -199,21 +199,21 @@ module.exports = {
         FetchSiteDefinitions(siteId, azureStorage.createTableService(), callback);
     },
 
-    InsertOrReplaceSiteDefinition(siteDefintion, callback){
+    InsertOrReplaceSiteDefinition(siteDefinition, callback){
         let tableService = azureStorage.createTableService();
-        const tableEntity = Object.assign({}, siteDefintion, {
-            defaultLocation: JSON.stringify(siteDefintion.defaultLocation),
-            targetBbox: JSON.stringify(siteDefintion.targetBbox),
-            supportedLanguages: JSON.stringify(siteDefintion.supportedLanguages),
+        const tableEntity = Object.assign({}, siteDefinition, {
+            defaultLocation: JSON.stringify(siteDefinition.defaultLocation),
+            targetBbox: JSON.stringify(siteDefinition.targetBbox),
+            supportedLanguages: JSON.stringify(siteDefinition.supportedLanguages),
             PartitionKey: AZURE_TBL_SITES_PARTITION_KEY,
-            RowKey: siteDefintion.name
+            RowKey: siteDefinition.name
         });
 
         tableService.createTableIfNotExists(AZURE_TBL_SITES, (error, result, response) => { // eslint-disable-line no-unused-vars
             if(!error){
                  tableService.insertOrReplaceEntity(AZURE_TBL_SITES, tableEntity, (error2, result, response) => {
                     if(!error2){
-                        FetchSiteDefinitions(siteDefintion.name, tableService, callback);
+                        FetchSiteDefinitions(siteDefinition.name, tableService, callback);
                     }else{
                         callback(`There was an error writing to table [${AZURE_TBL_SITES}] with definition[${JSON.stringify(tableEntity)}]`);
                     }
