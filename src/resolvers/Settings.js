@@ -22,11 +22,11 @@ module.exports = {
                     });
         });
     },
-    createOrReplaceSite(args, res){ // eslint-disable-line no-unused-vars
-        const siteDefintion = args.input;
+    createOrReplaceSite(args, res){
+        const siteDefinition = args.input;
 
         return new Promise((resolve, reject) => {
-            azureTableService.InsertOrReplaceSiteDefinition(siteDefintion,
+            azureTableService.InsertOrReplaceSiteDefinition(siteDefinition,
                     (error, result) => {
                         if(error){
                             let errorMsg = `Internal location server error: [${JSON.stringify(error)}]`;
