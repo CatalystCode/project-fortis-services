@@ -34,7 +34,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       if(siteType && siteType.length > 0) {
         cassandraConnector.openClient()
-          .then((client) => {
+          .then(client => {
             return insertSeedTopics(client, siteType);
           })
           .then(() => {
@@ -43,17 +43,13 @@ module.exports = {
           .then(result => {
             resolve(result && result.length > 0 ? result[0] : {});
           })
-          .catch(err => {
-            reject(err);
-          });
+          .catch(reject);
       } else {
         azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition)
           .then(result => {
             resolve(result && result.length > 0 ? result[0] : {});
           })
-          .catch(err => {
-            reject(err);
-          });
+          .catch(reject);
       }
     });
   },
@@ -300,9 +296,9 @@ module.exports = {
 
 let insertSeedTopics = (client, siteType) => {
   return new Promise((resolve, reject) => {
-    blobStorageManager.getBlobNamesWithSiteType(TOPICS_SEED_CONTAINER, siteType)
+    blobStorageManager.getBlobNamesWithSiteType(siteType)
        .then(blobNames => {
-         return blobStorageManager.List(TOPICS_SEED_CONTAINER, blobNames);
+         return blobStorageManager.List(blobNames);
        })
        .then(blobsTopics => {
          return blobsTopics.collection;
@@ -317,11 +313,7 @@ let insertSeedTopics = (client, siteType) => {
        .then(queries => {
          return cassandraTableStorageManager.batch(client, queries);
        })
-       .then(() => {
-         resolve();
-       })
-       .catch(err => {
-         reject(err);
-       });
+       .then(resolve)
+       .catch(reject);
   });
 };

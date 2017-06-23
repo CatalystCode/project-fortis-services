@@ -10,7 +10,7 @@ const SITE_TYPE = 'humanitarian';
 describe('Settings', function() {
 */
   //only use below test if you commentted out insertorreplacesitedef
-  /*
+/*
   describe('#createOrReplaceSite(args,res)', function() {
     it('should return a resolved result', function() {
       let args = {};
@@ -33,7 +33,7 @@ describe('Settings', function() {
       return settings.createOrReplaceSite(args, res);
     });
   })
-  */
+*/
 
   /*
   describe('#insertSeedTopics(client, siteType)', function() {

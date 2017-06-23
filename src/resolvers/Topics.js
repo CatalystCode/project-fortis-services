@@ -6,23 +6,16 @@ const blobStorageManager = require('../storageClients/BlobStorageManager');
 module.exports = {
   get(args) {
     return new Promise((resolve, reject) => {
-      blobStorageManager.Get(args.containerName, args.blobName, args.id)
-        .then(response => {
-          resolve(response);
-        }).catch(err => {
-          reject(err);
-        });
+      blobStorageManager.Get(args.blobName, args.id)
+        .then(resolve)
+        .catch(reject);
     });
   },
   list(args) {
     return new Promise((resolve, reject) => {
-      blobStorageManager.List(args.containerName, args.blobName)
-        .then(response => {
-          resolve(response);
-        })
-        .catch(err => {
-          reject(err);
-        });
+      blobStorageManager.List(args.blobName)
+        .then(resolve)
+        .catch(reject);
     });
   }
 };
