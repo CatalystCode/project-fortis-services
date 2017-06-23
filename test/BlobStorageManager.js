@@ -4,7 +4,6 @@ const expect = chai.expect;
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const TOPIC_SEED_CONTAINER = process.env.TOPIC_SEED_CONTAINER;
 const BLOB_NAME = 'siteTypes/humanitarian/topics/defaultTopics.json';
 const BLOB_NAMES = ['siteTypes/humanitarian/topics/defaultTopics.json', 'siteTypes/health/topics/defaultTopics.json'];
 const SITE_TYPE = 'humanitarian';

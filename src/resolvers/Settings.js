@@ -6,8 +6,6 @@ const blobStorageManager = require('../storageClients/BlobStorageManager');
 const cassandraTableStorageManager = require('../storageClients/CassandraTableStorageManager');
 const cassandraConnector = require('../connectors/CassandraConnector');
 
-const TOPICS_SEED_CONTAINER = 'settings';
-
 module.exports = {
   sites(args, res){ // eslint-disable-line no-unused-vars
     const startTime = Date.now();
