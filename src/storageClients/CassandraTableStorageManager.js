@@ -1,4 +1,14 @@
 'use strict';
+const appInsights = require('applicationinsights');
+appInsights.setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY)
+  .setAutoDependencyCorrelation(true)
+  .setAutoCollectRequests(true)
+  .setAutoCollectPerformance(true)
+  .setAutoCollectExceptions(true)
+  .setAutoCollectDependencies(true)
+  .start();
+
+const iclient = appInsights.getClient();
 
 const Promise = require('bluebird');
 
@@ -15,9 +25,26 @@ module.exports = {
 
   batch: (client, queries) => {
     return new Promise((resolve, reject) => {
+      let start = Date.now();
       Promise.all(chunkQueryPromises(client, queries, BATCH_LIMIT))
-        .then(resolve)
-        .catch(reject);
+        .then(() => {
+          let duration = Date.now() - start;
+          iclient.trackEvent(
+            'Cassandra batch', 
+            {
+              runTime: duration, 
+              request: {
+                queries: queries,
+                chunkSize: BATCH_LIMIT
+              }
+            }
+          );
+          resolve();
+        })
+        .catch(err => {
+          iclient.trackException(err);
+          reject(err);
+        });
     });
   }
 
