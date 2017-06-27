@@ -16,8 +16,6 @@ var EdgesSchema = require('./src/schemas/EdgesSchema');
 var EdgesResolver = require('./src/resolvers/Edges');
 var SettingsResolver = require('./src/resolvers/Settings');
 var SettingsSchema = require('./src/schemas/SettingsSchema');
-var TopicsSchema = require('./src/schemas/TopicsSchema');
-var TopicsResolver = require('./src/resolvers/Topics');
 
 var app = express();
 
@@ -67,12 +65,6 @@ app.use('/api/tiles', graphqlHTTP({
 app.use('/api/settings', graphqlHTTP({
   schema: SettingsSchema,
   rootValue: SettingsResolver,
-  graphiql: true
-}));
-
-app.use('/api/topics', graphqlHTTP({
-  schema: TopicsSchema,
-  rootValue: TopicsResolver,
   graphiql: true
 }));
 

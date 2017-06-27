@@ -1,8 +1,5 @@
 'use strict';
-const loggingClient = require('../loggingClient/LoggingClient');
-const iclient = loggingClient.getClient();
-const Promise = require('bluebird');
-const azureTableService = Promise.promisifyAll(require('../storageClients/AzureTableStorageManager'));
+const azureTableService = require('../storageClients/AzureTableStorageManager');
 const postgresMessageService = require('../postgresClients/PostgresLocationManager');
 const blobStorageManager = require('../storageClients/BlobStorageManager');
 const cassandraTableStorageManager = require('../storageClients/CassandraTableStorageManager');
@@ -35,23 +32,27 @@ module.exports = {
 
     return new Promise((resolve, reject) => {
       if(siteType && siteType.length > 0) {
-        cassandraConnector.openClient()
-          .then(client => {
-            return insertSeedTopics(client, siteType);
-          })
+        insertSeedTopics(siteType)
           .then(() => {
-            return azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition);
-          })
-          .then(result => {
-            resolve(result && result.length > 0 ? result[0] : {});
+            azureTableService.InsertOrReplaceSiteDefinition(siteDefinition, (error, result) => {
+              if (error) {
+                let errorMsg = `Internal location server error: [${JSON.stringify(error)}]`;
+                reject(errorMsg);
+              } else {
+                resolve(result && result.length > 0 ? result[0] : {});
+              }
+            });
           })
           .catch(reject);
       } else {
-        azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition)
-          .then(result => {
+        azureTableService.InsertOrReplaceSiteDefinition(siteDefinition, (error, result) => {
+          if (error) { 
+            let errorMsg = `Internal location server error: [${JSON.stringify(error)}]`;
+            reject(errorMsg);
+          } else {
             resolve(result && result.length > 0 ? result[0] : {});
-          })
-          .catch(reject);
+          }
+        });
       }
     });
   },
@@ -296,19 +297,14 @@ module.exports = {
   }
 };
 
-let insertSeedTopics = (client, siteType) => {
+/**
+ * Insert topics seed into Cassandra for a particular siteType
+ * @param {String} siteType 
+ * @return {Promise}
+ */
+let insertSeedTopics = (siteType) => {
   return new Promise((resolve, reject) => {
-    blobStorageManager.getBlobNamesWithSiteType(siteType)
-      .then(blobNames => {
-        return loggingClient.trackEventWithDuration(iclient, 'api/topic/list', {
-          runTime: '', 
-          request: blobNames,
-          response: null
-        }, () => blobStorageManager.getTopicList(blobNames));
-      })
-      .then(blobsTopics => {
-        return blobsTopics.collection;
-      })
+    blobStorageManager.getTopicsBySiteType(siteType)
       .then(topics => {
         let queries = [];
         for(let topic of topics) {
@@ -317,15 +313,8 @@ let insertSeedTopics = (client, siteType) => {
         return queries;
       })
       .then(queries => {
-        return loggingClient.trackEventWithDuration(iclient, 'Cassandra batch', {
-          runTime: '', 
-          request: {
-            queries: queries,
-            chunkSize: BATCH_LIMIT
-          }
-        }, () => Promise.all(cassandraTableStorageManager.chunkQueryPromises(client, queries, BATCH_LIMIT)));
+        resolve(cassandraConnector.executeQueries(queries, 'settings_insert_topics_seed'));
       })
-      .then(resolve)
       .catch(reject);
   });
 };
