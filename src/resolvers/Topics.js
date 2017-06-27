@@ -21,4 +21,4 @@ module.exports = {
 
 };
 
-//DELETE? - blob storage manager handles this
+//DELETE? - blob storage manager handles this, but this is used by graphql
