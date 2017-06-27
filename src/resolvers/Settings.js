@@ -5,8 +5,6 @@ const blobStorageManager = require('../storageClients/BlobStorageManager');
 const cassandraTableStorageManager = require('../storageClients/CassandraTableStorageManager');
 const cassandraConnector = require('../connectors/CassandraConnector');
 
-const BATCH_LIMIT = 10;
-
 module.exports = {
   sites(args, res){ // eslint-disable-line no-unused-vars
     const startTime = Date.now();
