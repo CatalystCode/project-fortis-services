@@ -13,7 +13,7 @@ module.exports = graphql.buildSchema(`
   }
   
   type Query {
-    get(blobName: String!, id: Int!): Topic
+    getTopic(blobName: String!, id: Int!): Topic
     list(blobName: String!): TopicCollection
   }
 `);

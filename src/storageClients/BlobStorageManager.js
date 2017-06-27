@@ -8,7 +8,7 @@ const TOPIC_SEED_CONTAINER = process.env.TOPIC_SEED_CONTAINER;
 
 module.exports = {
 
-  Get: (blobName, id) => {
+  getTopic: (blobName, id) => {
     let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
     return new Promise((resolve, reject) => {
       blobSvc.getBlobToTextAsync(TOPIC_SEED_CONTAINER, blobName, null)
@@ -22,7 +22,7 @@ module.exports = {
     });
   },
 
-  List: blobNames => {
+  getTopicList: blobNames => {
     return new Promise((resolve, reject) => {
       Promise.all(getListPromises(blobNames))
         .then(itemsArrays => {

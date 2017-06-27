@@ -1,3 +1,6 @@
+'use strict';
+const loggingClient = require('../src/loggingClient/LoggingClient');
+const iclient = loggingClient.getClient();
 const cassandra = require('cassandra-driver');
 const cassandraTableStorageManager = require('../src/storageClients/CassandraTableStorageManager');
 const chai = require('chai');
@@ -24,9 +27,18 @@ describe('CassandraTableStorageManager', function() {
       keyspace: process.env.CASSANDRA_KEYSPACE
     };
     const client = new cassandra.Client(options);
+    const BATCH_LIMIT = 10;
 
     it('Cassandra client should insert items in batches without error', function() {
-      return expect(cassandraTableStorageManager.batch(client, queries)).to.eventually.be.fulfilled;
+
+      return expect(loggingClient.trackEventWithDuration(iclient, 'Cassandra batch', {
+        runTime: '', 
+        request: {
+          queries: queries,
+          chunkSize: BATCH_LIMIT
+        }
+      }, () => Promise.all(cassandraTableStorageManager.chunkQueryPromises(client, queries, BATCH_LIMIT))))
+      .to.eventually.be.fulfilled;
     });
 
   });
@@ -40,7 +52,7 @@ describe('CassandraTableStorageManager', function() {
         topic: 'health',
         value: 'en'
       };
-
+      
       return expect(cassandraTableStorageManager.prepareInsertTopic(topic)).to.have.property('query');
     });
 

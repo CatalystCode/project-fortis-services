@@ -1,3 +1,6 @@
+'use strict';
+const loggingClient = require('../src/loggingClient/LoggingClient');
+const iclient = loggingClient.getClient();
 const cassandra = require('cassandra-driver');
 const cassandraConnector = require('../src/connectors/CassandraConnector');
 const chai = require('chai');
@@ -17,7 +20,9 @@ describe('Client', function() {
         keyspace: process.env.CASSANDRA_KEYSPACE
       };
       const client = new cassandra.Client(options);
-      return (expect(cassandraConnector.closeClient(client)).to.eventually.be.fulfilled);
+      
+      return expect(loggingClient.trackEventWithDuration(iclient, 'Cassandra shutdown time', 
+      { runTime: '' }, () => cassandraConnector.closeClient(client))).to.eventually.be.fulfilled;
     });
 
   });

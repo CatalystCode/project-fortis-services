@@ -1,17 +1,9 @@
 'use strict';
-const appInsights = require('applicationinsights');
-appInsights.setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY)
-  .setAutoDependencyCorrelation(true)
-  .setAutoCollectRequests(true)
-  .setAutoCollectPerformance(true)
-  .setAutoCollectExceptions(true)
-  .setAutoCollectDependencies(true)
-  .start();
-
-const iclient = appInsights.getClient();
-
+const loggingClient = require('../loggingClient/LoggingClient');
 const Promise = require('bluebird');
 const cassandra = Promise.promisifyAll(require('cassandra-driver'));
+
+const iclient = loggingClient.getClient();
 
 const CASSANDRA_CONTACT_POINTS = process.env.CASSANDRA_CONTACT_POINTS;
 const options = {
@@ -29,7 +21,7 @@ module.exports = {
       client.connect()
         .then(() => {
           let duration = Date.now() - start;
-          iclient.trackMetric('Cassandra connection time', duration);
+          iclient.trackEvent('Cassandra connection time', {runTime: duration});
           resolve(client);
         })
         .catch((err) => {
@@ -39,20 +31,12 @@ module.exports = {
         });
     });
   },
-
+  
   closeClient: client => {
-    let start = Date.now();
     return new Promise((resolve, reject) => {
       client.shutdown()
-        .then(() => {
-          let duration = Date.now() - start;
-          iclient.trackMetric('Cassandra shutdown time', duration);
-          resolve();
-        })
-        .catch(err => {
-          iclient.trackException(err);
-          reject(err);
-        });
+        .then(resolve)
+        .catch(reject);
     });
   }
 

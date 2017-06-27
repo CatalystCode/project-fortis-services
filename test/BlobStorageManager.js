@@ -10,18 +10,18 @@ const SITE_TYPE = 'humanitarian';
 
 describe('BlobStorageManager', function() {
 
-  describe('#Get(blobName, id)', function() {
+  describe('#getTopic(blobName, id)', function() {
 
     it('should return a single item', function() {
-      return expect(blobStorageManager.Get(BLOB_NAME, 1)).to.eventually.be.an('object');
+      return expect(blobStorageManager.getTopic(BLOB_NAME, 1)).to.eventually.be.an('object');
     });
 
     it('should be rejected', function() {
-      return expect(blobStorageManager.Get(BLOB_NAME, -1)).to.eventually.be.rejected;
+      return expect(blobStorageManager.getTopic(BLOB_NAME, -1)).to.eventually.be.rejected;
     });
 
     it('should throw error on null blobName', function() {
-      return blobStorageManager.Get(null, 1)
+      return blobStorageManager.getTopic(null, 1)
         .then(response => {
           expect(response).to.be.undefined;
         }).catch(err => {
@@ -30,7 +30,7 @@ describe('BlobStorageManager', function() {
     });
 
     it('should throw error on emptystring blobName', function() {
-      return blobStorageManager.Get('', 1)
+      return blobStorageManager.getTopic('', 1)
         .then(response => {
           expect(response).to.be.undefined;
         }).catch(err => {
@@ -40,9 +40,9 @@ describe('BlobStorageManager', function() {
 
   });
 
-  describe('#List(blobNames)', function() {
+  describe('#getTopicList(blobNames)', function() {
     it('should return all items for all the blobNames', function() {
-      return expect(blobStorageManager.List(BLOB_NAMES)).to.eventually.be.an('object');
+      return expect(blobStorageManager.getTopicList(BLOB_NAMES)).to.eventually.be.an('object');
     });
   });
 

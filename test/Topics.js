@@ -1,3 +1,6 @@
+'use strict';
+const loggingClient = require('../src/loggingClient/LoggingClient');
+const iclient = loggingClient.getClient();
 const topics = require('../src/resolvers/Topics');
 const chai = require('chai');
 const expect = chai.expect;
@@ -13,8 +16,12 @@ describe('Topics', function() {
       let args = {};
       args.blobName = BLOB_NAME;
       args.id = 1;
-
-      return topics.get(args)
+      
+      return loggingClient.trackEventWithDuration(iclient, 'api/topics/get', {
+        runTime: '', 
+        request: args,
+        response: null
+      }, () => topics.get(args))
         .then(response => {
           expect(response).to.be.an('object');
         }).catch(err => {
@@ -30,12 +37,17 @@ describe('Topics', function() {
       let args = {};
       args.blobName = BLOB_NAMES;
 
-      return topics.list(args)
+      return loggingClient.trackEventWithDuration(iclient, 'api/topics/list', {
+        runTime: '', 
+        request: args,
+        response: null
+      }, () => topics.list(args))
         .then(response => {
-          expect(response).to.be.an('object').that.has.all.keys('collection');
+          expect(response).to.be.an('object');
         }).catch(err => {
           expect(Boolean(err)).to.be.false;
         });
+
     });
 
   });

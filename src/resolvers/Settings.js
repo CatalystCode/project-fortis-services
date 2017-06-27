@@ -1,10 +1,14 @@
 'use strict';
+const loggingClient = require('../loggingClient/LoggingClient');
+const iclient = loggingClient.getClient();
 const Promise = require('bluebird');
 const azureTableService = Promise.promisifyAll(require('../storageClients/AzureTableStorageManager'));
 const postgresMessageService = require('../postgresClients/PostgresLocationManager');
 const blobStorageManager = require('../storageClients/BlobStorageManager');
 const cassandraTableStorageManager = require('../storageClients/CassandraTableStorageManager');
 const cassandraConnector = require('../connectors/CassandraConnector');
+
+const BATCH_LIMIT = 10;
 
 module.exports = {
   sites(args, res){ // eslint-disable-line no-unused-vars
@@ -295,23 +299,33 @@ module.exports = {
 let insertSeedTopics = (client, siteType) => {
   return new Promise((resolve, reject) => {
     blobStorageManager.getBlobNamesWithSiteType(siteType)
-       .then(blobNames => {
-         return blobStorageManager.List(blobNames);
-       })
-       .then(blobsTopics => {
-         return blobsTopics.collection;
-       })
-       .then(topics => {
-         let queries = [];
-         for(let topic of topics) {
-           queries.push(cassandraTableStorageManager.prepareInsertTopic(topic));
-         }
-         return queries;
-       })
-       .then(queries => {
-         return cassandraTableStorageManager.batch(client, queries);
-       })
-       .then(resolve)
-       .catch(reject);
+      .then(blobNames => {
+        return loggingClient.trackEventWithDuration(iclient, 'api/topic/list', {
+          runTime: '', 
+          request: blobNames,
+          response: null
+        }, () => blobStorageManager.getTopicList(blobNames));
+      })
+      .then(blobsTopics => {
+        return blobsTopics.collection;
+      })
+      .then(topics => {
+        let queries = [];
+        for(let topic of topics) {
+          queries.push(cassandraTableStorageManager.prepareInsertTopic(topic));
+        }
+        return queries;
+      })
+      .then(queries => {
+        return loggingClient.trackEventWithDuration(iclient, 'Cassandra batch', {
+          runTime: '', 
+          request: {
+            queries: queries,
+            chunkSize: BATCH_LIMIT
+          }
+        }, () => Promise.all(cassandraTableStorageManager.chunkQueryPromises(client, queries, BATCH_LIMIT)));
+      })
+      .then(resolve)
+      .catch(reject);
   });
 };

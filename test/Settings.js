@@ -17,24 +17,23 @@ describe('Settings', function() {
       args.input = {
         targetBbox: [],
         defaultZoomLevel: 1,
-        logo: "",
-        title: "",
-        name: "",
-        defaultLocation:[],
-        storageConnectionString: "",
-        featuresConnectionString: "",
-        mapzenApiKey: "",
-        fbToken: "",
-        supportedLanguages: ["en"],
+        logo: '',
+        title: '',
+        name: '',
+        defaultLocation: [],
+        storageConnectionString: '',
+        featuresConnectionString: '',
+        mapzenApiKey: '',
+        fbToken: '',
+        supportedLanguages: ['en'],
         siteType: 'humanitarian'
       };
-      let res = "";
+      let res = '';
 
       return settings.createOrReplaceSite(args, res);
     });
-  })
+  });
 */
-
   /*
   describe('#insertSeedTopics(client, siteType)', function() {
     it('should insert topics into cassandra', function() {
