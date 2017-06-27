@@ -53,9 +53,9 @@ describe('BlobStorageManager', function() {
     });
   });
 */
-  describe('#getBlobNamesWithSiteType(siteType)', function() {
+  describe('#getblobPathsWithSiteType(siteType)', function() {
     it('should return blob names that are of a certain siteType', function() {
-      return expect(blobStorageManager.getBlobNamesWithSiteType(SITE_TYPE)).to.eventually.be.an('array');
+      return expect(blobStorageManager.getblobPathsWithSiteType(SITE_TYPE)).to.eventually.be.an('array');
     });
   });
 

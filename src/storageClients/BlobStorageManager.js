@@ -9,14 +9,14 @@ const TOPIC_SEED_CONTAINER = process.env.TOPIC_SEED_CONTAINER;
 
 module.exports = {
 
-  getTopic: (blobName, id) => {
+  getTopic: (blobPath, id) => {
     return new Promise((resolve, reject) => {
       let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
       if (!blobSvc) {
         iclient.trackException('blobsvc is null'); 
         reject('blobsvc is null');
       } else {
-        blobSvc.getBlobToTextAsync(TOPIC_SEED_CONTAINER, blobName, null)
+        blobSvc.getBlobToTextAsync(TOPIC_SEED_CONTAINER, blobPath, null)
         .then(JSON.parse)
         .then(text => {
           let item = text[id];
@@ -28,9 +28,9 @@ module.exports = {
     });
   },
 
-  getTopicList: blobNames => {
+  getTopicList: blobPaths => {
     return new Promise((resolve, reject) => {
-      Promise.all(getListPromises(blobNames))
+      Promise.all(getListPromises(blobPaths))
         .then(itemsArrays => {
           resolve({'collection': flatten(itemsArrays)});
         })
@@ -38,12 +38,12 @@ module.exports = {
     });
   },
 
-  getBlobNamesWithSiteType: siteType => {
+  getblobPathsWithSiteType: siteType => {
     return new Promise((resolve, reject) => {
-      listBlobsInContainer()
-        .then(blobNames => {
-          blobNames = blobNames.filter(blobName => (blobName.indexOf(siteType) > -1));
-          resolve(blobNames);
+      listBlobPathsInContainer()
+        .then(blobPaths => {
+          blobPaths = blobPaths.filter(blobPath => (blobPath.indexOf(siteType) > -1));
+          resolve(blobPaths);
         })
         .catch(reject);
     });
@@ -53,17 +53,17 @@ module.exports = {
 
 let flatten = arrayOfArrays => [].concat.apply([], arrayOfArrays);
 
-let getListPromises = blobNames => {
+let getListPromises = blobPaths => {
   let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
   if (!blobSvc) {
     iclient.trackException('blobsvc is null'); 
     return null;
   } else {
     let listPromises = [];
-    blobNames.map(blobName => {
+    blobPaths.map(blobPath => {
       listPromises.push(
         new Promise((resolve, reject) => {
-          blobSvc.getBlobToTextAsync(TOPIC_SEED_CONTAINER, blobName, null)
+          blobSvc.getBlobToTextAsync(TOPIC_SEED_CONTAINER, blobPath, null)
             .then(JSON.parse)
             .then(resolve)
             .catch(reject);
@@ -74,7 +74,7 @@ let getListPromises = blobNames => {
   }
 };
 
-let listBlobsInContainer = () => {
+let listBlobPathsInContainer = () => {
   return new Promise((resolve, reject) => {
     let blobSvc = azure.createBlobService(BLOB_STORAGE_CONNECTION_STRING);
     if (!blobSvc) {
