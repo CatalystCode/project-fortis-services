@@ -4,6 +4,7 @@
 A node-based azure web app meant to host express web services
 
 ## Environment Variables
+```
 export FORTIS_FEATURE_SERVICE_HOST="..."
 export FACEBOOK_APP_ID="..."
 export FACEBOOK_APP_SECRET="..."
@@ -25,3 +26,4 @@ export CASSANDRA_KEYSPACE="..."
 export CASSANDRA_CONTACT_POINTS="..."
 export TOPIC_SEED_CONTAINER="..."
 export APPINSIGHTS_INSTRUMENTATIONKEY="..."
+```
