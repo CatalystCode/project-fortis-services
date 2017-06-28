@@ -1,15 +1,34 @@
 'use strict';
-
-const Promise = require('bluebird');
-
 const BATCH_LIMIT = 10;
 
 module.exports = {
 
-  prepareInsertTopic: topic => { //TODO: the insert statement to reflect the final topic schema
+  prepareInsertTopic: topic => {
     return {
-      query: 'INSERT INTO topics (id, topic, value) VALUES (?, ?, ?)',
-      params: [ topic.id, topic.topic, topic.value ]
+      query: `INSERT INTO computedtopics (
+        periodstartdate, 
+        periodenddate, 
+        periodtype,
+        period, 
+        pipeline, 
+        sourceid,
+        topic,
+        topiclangcode,
+        insertion_time,
+        computedfeatures
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      params: [ 
+        topic.periodstartdate, 
+        topic.periodenddate, 
+        topic.periodtype,
+        topic.period,
+        topic.pipeline,
+        topic.sourceid,
+        topic.topic,
+        topic.topiclangcode,
+        topic.insertion_time,
+        topic.computedfeatures
+      ]
     };
   },
 

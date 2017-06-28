@@ -1,6 +1,5 @@
 'use strict';
-const Promise = require('bluebird');
-const azureTableService = Promise.promisifyAll(require('../storageClients/AzureTableStorageManager'));
+const azureTableService = require('../storageClients/AzureTableStorageManager');
 const postgresMessageService = require('../postgresClients/PostgresLocationManager');
 const blobStorageManager = require('../storageClients/BlobStorageManager');
 const cassandraTableStorageManager = require('../storageClients/CassandraTableStorageManager');
@@ -31,23 +30,27 @@ module.exports = {
 
     return new Promise((resolve, reject) => {
       if(siteType && siteType.length > 0) {
-        cassandraConnector.openClient()
-          .then(client => {
-            return insertSeedTopics(client, siteType);
-          })
+        insertSeedTopics(siteType)
           .then(() => {
-            return azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition);
-          })
-          .then(result => {
-            resolve(result && result.length > 0 ? result[0] : {});
+            azureTableService.InsertOrReplaceSiteDefinition(siteDefinition, (error, result) => {
+              if (error) {
+                let errorMsg = `Internal location server error: [${JSON.stringify(error)}]`;
+                reject(errorMsg);
+              } else {
+                resolve(result && result.length > 0 ? result[0] : {});
+              }
+            });
           })
           .catch(reject);
       } else {
-        azureTableService.InsertOrReplaceSiteDefinitionAsync(siteDefinition)
-          .then(result => {
+        azureTableService.InsertOrReplaceSiteDefinition(siteDefinition, (error, result) => {
+          if (error) { 
+            let errorMsg = `Internal location server error: [${JSON.stringify(error)}]`;
+            reject(errorMsg);
+          } else {
             resolve(result && result.length > 0 ? result[0] : {});
-          })
-          .catch(reject);
+          }
+        });
       }
     });
   },
@@ -292,26 +295,24 @@ module.exports = {
   }
 };
 
-let insertSeedTopics = (client, siteType) => {
+/**
+ * Insert topics seed into Cassandra for a particular siteType
+ * @param {String} siteType 
+ * @return {Promise}
+ */
+let insertSeedTopics = (siteType) => {
   return new Promise((resolve, reject) => {
-    blobStorageManager.getBlobNamesWithSiteType(siteType)
-       .then(blobNames => {
-         return blobStorageManager.List(blobNames);
-       })
-       .then(blobsTopics => {
-         return blobsTopics.collection;
-       })
-       .then(topics => {
-         let queries = [];
-         for(let topic of topics) {
-           queries.push(cassandraTableStorageManager.prepareInsertTopic(topic));
-         }
-         return queries;
-       })
-       .then(queries => {
-         return cassandraTableStorageManager.batch(client, queries);
-       })
-       .then(resolve)
-       .catch(reject);
+    blobStorageManager.getTopicsBySiteType(siteType)
+      .then(topics => {
+        let queries = [];
+        for(let topic of topics) {
+          queries.push(cassandraTableStorageManager.prepareInsertTopic(topic));
+        }
+        return queries;
+      })
+      .then(queries => {
+        resolve(cassandraConnector.executeQueries(queries, 'settings_insert_topics_seed'));
+      })
+      .catch(reject);
   });
 };
