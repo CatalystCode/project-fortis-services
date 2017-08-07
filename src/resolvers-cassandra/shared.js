@@ -2,6 +2,8 @@
 
 const Promise = require('promise');
 const geotile = require('geotile');
+const memoize = require('lodash/memoize');
+const featureServiceClient = require('../clients/locations/FeatureServiceClient');
 
 function withRunTime(promiseFunc) {
   function runTimer() {
@@ -85,7 +87,12 @@ function parseFromToDate(fromDate, toDate) {
   };
 }
 
+const fetchBboxLocations = memoize((bbox) => {
+  return featureServiceClient.fetchByBbox({north: bbox[0], west: bbox[1], south: bbox[2], east: bbox[3]});
+}, (bbox) => bbox.join('|'));
+
 module.exports = {
+  fetchBboxLocations,
   parseFromToDate,
   parseTimespan,
   toPipelineKey,

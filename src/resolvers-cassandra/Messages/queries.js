@@ -3,8 +3,7 @@
 const Promise = require('promise');
 const translatorService = require('../../clients/translator/MsftTranslator');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
-const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { parseFromToDate, withRunTime, toPipelineKey, toConjunctionTopics, limitForInClause } = require('../shared');
+const { fetchBboxLocations, parseFromToDate, withRunTime, toPipelineKey, toConjunctionTopics, limitForInClause } = require('../shared');
 const { makeSet } = require('../../utils/collections');
 const trackEvent = require('../../clients/appinsights/AppInsightsClient').trackEvent;
 
@@ -50,7 +49,7 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
 
     const { fromDate, toDate } = parseFromToDate(args.fromDate, args.toDate);
 
-    featureServiceClient.fetchByBbox({north: args.bbox[0], west: args.bbox[1], south: args.bbox[2], east: args.bbox[3]})
+    fetchBboxLocations(args.bbox)
     .then(places => {
       const placeIds = makeSet(places, place => place.id);
       const limit = args.limit || 15;
