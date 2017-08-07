@@ -3,6 +3,7 @@
 const Promise = require('promise');
 const translatorService = require('../../clients/translator/MsftTranslator');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
+const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
 const { parseFromToDate, withRunTime, toPipelineKey, toConjunctionTopics, limitForInClause } = require('../shared');
 const { makeSet } = require('../../utils/collections');
 const trackEvent = require('../../clients/appinsights/AppInsightsClient').trackEvent;
@@ -45,24 +46,12 @@ function byLocation(args, res) { // eslint-disable-line no-unused-vars
  */
 function byBbox(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    if (!args || !args.site) return reject('Invalid or no site specified');
+    if (!args || !args.bbox || args.bbox.length !== 4) return reject('Invalid or no bounding box specified');
 
     const { fromDate, toDate } = parseFromToDate(args.fromDate, args.toDate);
 
-    const placesQuery = `
-    SELECT places
-    FROM fortis.sitesettings
-    WHERE sitename = ?
-    `.trim();
-
-    const placesParams = [
-      args.site
-    ];
-
-    cassandraConnector.executeQuery(placesQuery, placesParams)
+    featureServiceClient.fetchByBbox({north: args.bbox[0], west: args.bbox[1], south: args.bbox[2], east: args.bbox[3]})
     .then(places => {
-      if (!places || !places.length) return reject(`No places configured for site ${args.site}`);
-
       const placeIds = makeSet(places, place => place.id);
       const limit = args.limit || 15;
 
