@@ -3,7 +3,7 @@
 const Promise = require('promise');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { tilesForBbox, parseTimespan, parseFromToDate, withRunTime, toPipelineKey, toConjunctionTopics } = require('../shared');
+const { fetchBboxLocations, tilesForBbox, parseTimespan, parseFromToDate, withRunTime, toPipelineKey, toConjunctionTopics } = require('../shared');
 const { makeSet, makeMap, makeMultiMap } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
@@ -57,8 +57,7 @@ function locations(args, res) { // eslint-disable-line no-unused-vars
       if (rows.length > 1) return reject(`More than one geofence configured for site ${args.site}`);
       if (!rows[0].geofence || rows[0].geofence.length !== 4) return reject(`Bad geofence for site ${args.site}`);
 
-      const bbox = rows[0].geofence;
-      return featureServiceClient.fetchByBbox({north: bbox[0], west: bbox[1], south: bbox[2], east: bbox[3]});
+      return fetchBboxLocations(rows[0].geofence);
     })
     .then(locations => {
       resolve({

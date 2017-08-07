@@ -3,8 +3,7 @@
 const Promise = require('promise');
 const geotile = require('geotile');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
-const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { tilesForBbox, parseFromToDate, withRunTime, toConjunctionTopics, toPipelineKey } = require('../shared');
+const { fetchBboxLocations, tilesForBbox, parseFromToDate, withRunTime, toConjunctionTopics, toPipelineKey } = require('../shared');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 const { makeSet } = require('../../utils/collections');
 
@@ -105,7 +104,7 @@ function fetchPlacesByBBox(args, res) { // eslint-disable-line no-unused-vars
     if (!args || !args.bbox) return reject('No bounding box for which to fetch places specified');
     if (args.bbox.length !== 4) return reject('Invalid bounding box for which to fetch places specified');
 
-    featureServiceClient.fetchByBbox({north: args.bbox[0], west: args.bbox[1], south: args.bbox[2], east: args.bbox[3]})
+    fetchBboxLocations(args.bbox)
     .then(places => {
       const features = places.map(place => ({coordinate: place.bbox, name: place.name, id: place.id}));
       resolve({
