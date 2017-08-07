@@ -41,28 +41,20 @@ function locations(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     if (!args || !args.site) return reject('No site specified for which to lookup locations');
 
-    const query = `
-    SELECT geofence
+    const placesQuery = `
+    SELECT places
     FROM fortis.sitesettings
     WHERE sitename = ?
     `.trim();
 
-    const params = [
-      args.sitename
+    const placesParams = [
+      args.site
     ];
 
-    cassandraConnector.executeQuery(query, params)
-    .then(rows => {
-      if (!rows || !rows.length) return reject(`No geofence configured for site ${args.site}`);
-      if (rows.length > 1) return reject(`More than one geofence configured for site ${args.site}`);
-      if (!rows[0].geofence || rows[0].geofence.length !== 4) return reject(`Bad geofence for site ${args.site}`);
-
-      const bbox = rows[0].geofence;
-      return featureServiceClient.fetchByBbox({north: bbox[0], west: bbox[1], south: bbox[2], east: bbox[3]});
-    })
-    .then(locations => {
+    cassandraConnector.executeQuery(placesQuery, placesParams)
+    .then(places => {
       resolve({
-        edges: locations.map(location => ({name: location.name, coordinates: location.bbox}))
+        edges: places.map(place => ({name: place.name, coordinates: place.bbox}))
       });
     })
     .catch(reject);

@@ -46,7 +46,7 @@ function byLocation(args, res) { // eslint-disable-line no-unused-vars
  */
 function byBbox(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    if (!args.bbox || args.bbox.length !== 4) return reject('Invalid bbox specified');
+    if (!args || !args.bbox || args.bbox.length !== 4) return reject('Invalid or no bounding box specified');
 
     const { fromDate, toDate } = parseFromToDate(args.fromDate, args.toDate);
 
