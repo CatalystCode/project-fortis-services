@@ -6,6 +6,7 @@ const cassandraConnector = require('../../clients/cassandra/CassandraConnector')
 const blobStorageClient = require('../../clients/storage/BlobStorageClient');
 const { withRunTime, limitForInClause } = require('../shared');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
+const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
 const apiUrlBase = process.env.FORTIS_CENTRAL_ASSETS_HOST || 'https://fortiscentral.blob.core.windows.net';
 const STREAM_PIPELINE_TWITTER = 'twitter';
 const STREAM_CONNECTOR_TWITTER = 'Twitter';
@@ -59,6 +60,8 @@ function createSite(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const siteType = args && args.input && args.input.siteType;
     if (!siteType || !siteType.length) return reject(`siteType for sitename ${args.input.name} is not defined`);
+    const bbox = args && args.input && args.input.targetBbox;
+    if (!bbox || bbox.length !== 4) return reject(`Invalid or missing geofence for sitename ${args.input.name}: should be north/west/south/east coordinates tuple`);
 
     cassandraConnector.executeQuery('SELECT * FROM fortis.sitesettings WHERE sitename = ?;', [args.input.name])
     .then(rows => {
@@ -67,6 +70,9 @@ function createSite(args, res) { // eslint-disable-line no-unused-vars
       else return reject(`(${rows.length}) number of sites with sitename ${args.input.name} already exist.`);
     })
     .then(() => {
+      return featureServiceClient.fetchByBbox({north: bbox[0], west: bbox[1], south: bbox[2], east: bbox[3]});
+    })
+    .then((places) => {
       return cassandraConnector.executeBatchMutations([{
         query: `INSERT INTO fortis.sitesettings (
           geofence,
@@ -75,14 +81,16 @@ function createSite(args, res) { // eslint-disable-line no-unused-vars
           title,
           sitename,
           languages,
+          places,
           insertion_time
         ) VALUES (?,?,?,?,?,?,toTimestamp(now()))`,
         params: [
-          args.input.targetBbox,
+          bbox,
           args.input.defaultZoomLevel,
           args.input.logo,
           args.input.title,
           args.input.name,
+          places.map(place => ({id: place.id, name: place.name, bbox: place.bbox})),
           args.input.supportedLanguages
         ]
       }]);
