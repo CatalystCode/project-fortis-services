@@ -31,12 +31,66 @@ function eventToFeature(row) {
 }
 
 /**
- * @param {site: string, originalSource: string, coordinates: number[], filteredEdges: string[], langCode: string, limit: number, offset: number, fromDate: string, toDate: string, sourceFilter: string[], fulltextTerm: string} args
+ * @param {site: string, originalSource: string, placeId: string, filteredEdges: string[], langCode: string, limit: number, offset: number, fromDate: string, toDate: string, sourceFilter: string[], fulltextTerm: string, mainTerm: string} args
  * @returns {Promise.<{runTime: string, type: string, bbox: number[], features: Feature[]}>}
  */
 function byLocation(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    return reject('Querying by location is no longer supported, please query using the place name instead');
+    if (!args || !args.placeId) return reject('Invalid place id specified');
+
+    const { fromDate, toDate } = parseFromToDate(args.fromDate, args.toDate);
+    const limit = args.limit || 15;
+
+    const placesQuery = `
+    SELECT eventid
+    FROM fortis.eventplaces
+    WHERE placeid = ?
+    AND conjunctiontopic1 = ?
+    AND conjunctiontopic2 = ?
+    AND conjunctiontopic3 = ?
+    AND pipelinekey = ?
+    AND externalsourceid = ?
+    AND eventtime <= ?
+    AND eventtime >= ?
+    `.trim();
+
+    const placesParams = [
+      args.placeId,
+      ...toConjunctionTopics(args.mainTerm, args.filteredEdges),
+      toPipelineKey(args.sourceFilter),
+      'all',
+      toDate,
+      fromDate
+    ];
+
+    return cassandraConnector.executeQuery(placesQuery, placesParams)
+    .then(rows => {
+      const eventIds = makeSet(rows, row => row.eventid);
+
+      const eventsQuery = `
+      SELECT *
+      FROM fortis.events
+      WHERE pipelinekey = ?
+      AND eventid IN ?
+      AND fulltext LIKE ?
+      LIMIT ?
+      `.trim();
+
+      const eventsParams = [
+        toPipelineKey(args.sourceFilter),
+        limitForInClause(eventIds),
+        `%${args.fulltextTerm}%`,
+        limit
+      ];
+
+      return cassandraConnector.executeQuery(eventsQuery, eventsParams);
+    })
+    .then(rows => {
+      resolve({
+        features: rows.map(eventToFeature)
+      });
+    })
+    .catch(reject);
   });
 }
 
