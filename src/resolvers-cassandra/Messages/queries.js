@@ -59,16 +59,12 @@ function queryEventsTable(eventIdResponse, args) {
     }
 
     cassandraConnector.executeQuery(eventsQuery, eventsParams)
-    .then(rows => {
-      const features = rows.map(eventToFeature);
-      const pageState = eventIdResponse.pageState;
-
-      resolve({
+    .then(rows => resolve({
         type: 'FeatureCollection',
-        features, pageState,
+        features: rows.map(eventToFeature),
+        pageState: eventIdResponse.pageState,
         bbox: args.bbox
-      });
-    })
+    }))
     .catch(reject);
   });
 }
@@ -126,7 +122,7 @@ function byLocation(args, res) { // eslint-disable-line no-unused-vars
 function byBbox(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     if (!args.bbox || args.bbox.length !== 4) return reject('Invalid bbox specified');
-    if (!args.conjunctivetopics || args.conjunctivetopics.length === 0) return reject('Empty conjunctive topic list specified');
+    if (!args.conjunctivetopics.length) return reject('Empty conjunctive topic list specified');
 
     const [north, west, south, east] = args.bbox;
 
