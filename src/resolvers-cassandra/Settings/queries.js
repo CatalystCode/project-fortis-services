@@ -36,8 +36,6 @@ function sites(args, res) { // eslint-disable-line no-unused-vars
       return reject('No site id to fetch specified');
     }
     
-    console.log('called')
-
     const siteById = 'SELECT * FROM fortis.sitesettings WHERE sitename = ?';
     cassandraConnector.executeQuery(siteById, [siteId])
     .then(rows => {
