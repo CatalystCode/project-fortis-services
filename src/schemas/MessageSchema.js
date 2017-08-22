@@ -2,7 +2,7 @@ const graphql = require('graphql');
 
 module.exports = graphql.buildSchema(`
   type Query {
-    byBbox(site: String!, originalSource: String, 
+    byBbox(originalSource: String, 
            bbox: [Float]!, mainTerm: String, 
            filteredEdges: [String]!, langCode: String!, 
            limit: Int, pageState: String, fromDate: String!, toDate: String!,  
@@ -93,21 +93,5 @@ module.exports = graphql.buildSchema(`
     properties: MessageProperties,
     fullText: String,
     link: String
-  }
-
-  type MessageProperties {
-    retweetCount: Int,
-    fatalaties: Int,
-    userConnecionCount: Int,
-    actor1: String,
-    actor2: String,
-    actor1Type: String,
-    actor2Type: String,
-    incidentType: String,
-    allyActor1: String,
-    allyActor2: String,
-    title: String,
-    link: String,
-    originalSources: [String]
   }
 `);
