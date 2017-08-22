@@ -2,10 +2,17 @@ const graphql = require('graphql');
 
 module.exports = graphql.buildSchema(`
   type Query {
-    byBbox(site: String!, originalSource: String, bbox: [Float]!, mainTerm: String, filteredEdges: [String]!, langCode: String!, limit: Int, offset: Int, fromDate: String!, toDate: String!, sourceFilter: [String], fulltextTerm: String): FeatureCollection
+    byBbox(site: String!, originalSource: String, 
+           bbox: [Float]!, mainTerm: String, 
+           filteredEdges: [String]!, langCode: String!, 
+           limit: Int, offset: Int, fromDate: String!, toDate: String!,  
+           sourceFilter: [String], fulltextTerm: String): FeatureCollection
     byLocation(site: String!, originalSource: String, coordinates: [Float]!, mainTerm: String, filteredEdges: [String]!, langCode: String!, limit: Int, offset: Int, fromDate: String!, toDate: String!, sourceFilter: [String], fulltextTerm: String): FeatureCollection
-    byEdges(site: String!, mainTerm: String, filteredEdges: [String]!, langCode: String!, limit: Int, offset: Int, fromDate: String!, toDate: String!, sourceFilter: [String], fulltextTerm: String): FeatureCollection
-    event(site: String!, messageId: String!): Feature,
+    byEdges(site: String!, mainTerm: String, 
+            filteredEdges: [String]!, langCode: String!, 
+            limit: Int, offset: Int, fromDate: String!, 
+            toDate: String!, sourceFilter: [String], fulltextTerm: String): FeatureCollection
+    event(site: String!, messageId: String!): Feature
     translate(sentence: String!, fromLanguage: String!, toLanguage: String!): TranslationResult
     translateWords(words: [String]!, fromLanguage: String!, toLanguage: String!): TranslatedWords
   }
@@ -55,12 +62,14 @@ module.exports = graphql.buildSchema(`
   type FeatureCollection {
     runTime: String,
     type: TypeEnum!,
+    pageState: String,
     bbox: [Float],
     features: [Feature]!,
   }
 
   enum FeatureType {
-    MultiPoint
+    MultiPoint,
+    Point
   }
 
   type Feature {
@@ -75,7 +84,7 @@ module.exports = graphql.buildSchema(`
     createdtime: String,
     sentiment: Float,
     title: String,
-    originalSources: [String],
+    originalSources: String,
     sentence: String,
     language: String,
     source: String,

@@ -12,26 +12,29 @@ const trackEvent = require('../../clients/appinsights/AppInsightsClient').trackE
  */
 
 function eventToFeature(row) {
+  const FeatureType = 'Point';
+
   return {
-    type: row.pipelinekey,
+    type: FeatureType,
     coordinates: [],
     properties: {
       edges: row.topics,
       messageid: row.eventid,
-      createdtime: row.event_time,
-      sentiment: row.computedfeatures && row.computedfeatures.sentiment,
+      createdtime: row.eventtime,
+      sentiment: row.computedfeatures && row.computedfeatures.sentiment ? row.computedfeatures.sentiment : -1,
       title: row.title,
+      sentence: row.
       originalSources: row.externalsourceid,
       language: row.eventlangcode,
       source: row.sourceurl,
-      fullText: row.messagebody
+      fullText: row.body
     }
   };
 }
 
-function queryEventsTable(rowsWithEventIds, args) {
+function queryEventsTable(eventIdResponse, args) {
   return new Promise((resolve, reject) => {
-    const eventIds = makeSet(rowsWithEventIds, row => row.eventid);
+    const eventIds = makeSet(eventIdResponse.rows, row => row.eventid);
 
     if (!eventIds.size) {
       return reject('No events matched the query');
@@ -40,12 +43,10 @@ function queryEventsTable(rowsWithEventIds, args) {
     let eventsQuery = `
     SELECT *
     FROM fortis.events
-    WHERE pipelinekey = ?
-    AND eventid IN ?
+    WHERE eventid IN ?
     `.trim();
 
-    const eventsParams = [
-      toPipelineKey(args.sourceFilter),
+    let eventsParams = [
       limitForInClause(eventIds)
     ];
 
@@ -63,9 +64,11 @@ function queryEventsTable(rowsWithEventIds, args) {
     cassandraConnector.executeQuery(eventsQuery, eventsParams)
     .then(rows => {
       const features = rows.map(eventToFeature);
+      const pageState = eventIdResponse.pageState;
 
       resolve({
-        features
+        type: 'FeatureCollection',
+        features, pageState
       });
     })
     .catch(reject);
@@ -119,45 +122,46 @@ function byLocation(args, res) { // eslint-disable-line no-unused-vars
 }
 
 /**
- * @param {site: string, originalSource: string, bbox: number[], mainTerm: string, filteredEdges: string[], langCode: string, limit: number, offset: number, fromDate: string, toDate: string, sourceFilter: string[], fulltextTerm: string} args
+ * @param {site: string, originalSource: string, bbox: number[], mainTerm: string, filteredEdges: string[], langCode: string, limit: number, pageState: number, fromDate: string, toDate: string, sourceFilter: string[], fulltextTerm: string} args
  * @returns {Promise.<{runTime: string, type: string, bbox: number[], features: Feature[]}>}
- */
+ **/
 function byBbox(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     if (!args.bbox || args.bbox.length !== 4) return reject('Invalid bbox specified');
-
-    const { fromDate, toDate } = parseFromToDate(args.fromDate, args.toDate);
     const [north, west, south, east] = args.bbox;
+    const PagingRate = 4;
+
+    let tableName = "eventplaces";
+    let tagsParams = [
+      ...toConjunctionTopics(args.mainTerm, args.filteredEdges),
+      args.toDate,
+      north,
+      east,
+      args.fromDate,
+      south,
+      west
+    ];
+
+    if(args.originalSource){
+      tagsParams.push(args.originalSource);
+      tableName = "eventplacesbysource";
+    }
 
     const tagsQuery = `
     SELECT eventid
-    FROM fortis.eventplaces
+    FROM fortis.${tableName}
     WHERE conjunctiontopic1 = ?
     AND conjunctiontopic2 = ?
     AND conjunctiontopic3 = ?
-    AND pipelinekey = ?
-    AND externalsourceid = ?
-    AND (centroidlat, centroidlon, eventtime) <= (?, ?, ?)
-    AND (centroidlat, centroidlon, eventtime) >= (?, ?, ?)
-    LIMIT ?
+    AND (eventtime, centroidlat, centroidlon) <= (?, ?, ?)
+    AND (eventtime, centroidlat, centroidlon) >= (?, ?, ?)
+    ${args.originalSource ? ' AND externalsourceid = ?' : ''}
+    ${args.sourceFilter ? ` AND pipelinekey IN('${args.sourceFilter.join('\',\'')}')` : ''}
     `.trim();
 
-    const tagsParams = [
-      ...toConjunctionTopics(args.mainTerm, args.filteredEdges),
-      toPipelineKey(args.sourceFilter),
-      'all',
-      north,
-      east,
-      fromDate,
-      south,
-      west,
-      toDate,
-      parseLimit(args.limit)
-    ];
-
-    cassandraConnector.executeQuery(tagsQuery, tagsParams)
-    .then(rows => {
-      return queryEventsTable(rows, args);
+    cassandraConnector.executeQueryWithPageState(tagsQuery, tagsParams, args.pageState, (parseLimit(args.limit) * PagingRate))
+    .then(response => {
+      return queryEventsTable(response, args);
     })
     .then(resolve)
     .catch(reject);

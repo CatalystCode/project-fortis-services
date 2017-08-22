@@ -87,7 +87,9 @@ function parseFromToDate(fromDate, toDate) { // eslint-disable-line no-unused-va
 }
 
 function parseLimit(limit) {
-  return limit > 0 ? limit : 15;
+  const DEFAULT_LIMIT = 15;
+
+  return limit && limit > 0 ? limit : DEFAULT_LIMIT;
 }
 
 module.exports = {
