@@ -74,7 +74,7 @@ function executeQuery(query, params, options) {
     try {
       const rows = [];
       const stream = client.stream(query, params, options)
-        .on('readable', result => {
+        .on('readable', () => {
           let row;
           while((row = stream.read()) != undefined) {
             rows.push(row);
