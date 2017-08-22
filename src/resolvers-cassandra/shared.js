@@ -44,7 +44,7 @@ function toPipelineKey(sourceFilter) {
   return sourceFilter[0];
 }
 
-function fromTopicListToConjunctionTopics(topicTerms){
+function fromTopicListToConjunctionTopics(topicTerms) {
   const conjunctiveTopicLimit = 3;
   let selectedFilters = topicTerms.filter(edge => !!edge).slice(0, conjunctiveTopicLimit).sort();
 
