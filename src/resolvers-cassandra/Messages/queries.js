@@ -155,7 +155,7 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
     AND conjunctiontopic3 = ?
     AND (eventtime, centroidlat, centroidlon) <= (?, ?, ?)
     AND (eventtime, centroidlat, centroidlon) >= (?, ?, ?)
-    ${args.pipelinekeys ? ` AND pipelinekey IN ?` : ''}
+    ${args.pipelinekeys ? ' AND pipelinekey IN ?' : ''}
     ${args.externalsourceid ? ' AND externalsourceid = ?' : ''}
     `.trim();
 
