@@ -128,7 +128,7 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
 
     let tableName = 'eventplaces';
     let tagsParams = [
-      ...toConjunctionTopics(args.mainTerm, args.filteredEdges),
+      ...fromTopicListToConjunctionTopics(args.conjunctivetopics),
       args.toDate,
       north,
       east,
