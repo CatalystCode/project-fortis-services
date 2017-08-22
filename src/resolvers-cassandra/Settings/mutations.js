@@ -58,7 +58,7 @@ const insertTopics = trackEvent(_insertTopics, 'Settings.Topics.Insert', (respon
 function editSite(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const siteName = args && args.input && args.input.name;
-    if (!siteName || !siteName.length) return reject(`sitename is not defined`);
+    if (!siteName || !siteName.length) return reject('sitename is not defined');
 
     cassandraConnector.executeQuery('SELECT * FROM fortis.sitesettings WHERE sitename = ?;', [siteName])
     .then(rows => {
