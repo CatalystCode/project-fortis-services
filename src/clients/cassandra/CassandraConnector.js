@@ -101,25 +101,17 @@ function executeQuery(query, params, options) {
  */
 function executeQueryWithPageState(query, params, pageState, fetchSize) {
   return new Promise((resolve, reject) => {
-      const DEFUALT_FETCH = 15;
+      const DEFAULT_FETCH = 15;
 
       let options = {
-        fetchSize: fetchSize || DEFUALT_FETCH
+        fetchSize: fetchSize || DEFAULT_FETCH
       };
 
       if(pageState)
         options.pageState = pageState
 
-      console.log('options');
-      console.log(JSON.stringify(options));
-      console.log(`query: ${query}`);
-      console.log(`params: ${params}`);
-
       client.execute(query, params, options)
-            .then(result => {
-                console.log(JSON.stringify(result));
-                resolve(Object.assign({}, {pageState: result.pageState, rows: result.rows}));
-            })
+            .then(result => resolve(Object.assign({}, {pageState: result.pageState, rows: result.rows})))
             .catch(exception => {
               console.log('Error ' + exception);
               reject(exception)

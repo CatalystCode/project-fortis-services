@@ -5,7 +5,7 @@ module.exports = graphql.buildSchema(`
     byBbox(site: String!, originalSource: String, 
            bbox: [Float]!, mainTerm: String, 
            filteredEdges: [String]!, langCode: String!, 
-           limit: Int, offset: Int, fromDate: String!, toDate: String!,  
+           limit: Int, pageState: String, fromDate: String!, toDate: String!,  
            sourceFilter: [String], fulltextTerm: String): FeatureCollection
     byLocation(site: String!, originalSource: String, coordinates: [Float]!, mainTerm: String, filteredEdges: [String]!, langCode: String!, limit: Int, offset: Int, fromDate: String!, toDate: String!, sourceFilter: [String], fulltextTerm: String): FeatureCollection
     byEdges(site: String!, mainTerm: String, 
@@ -82,14 +82,17 @@ module.exports = graphql.buildSchema(`
     edges: [String],
     messageid: ID,
     createdtime: String,
+    sourceeventid: String,
     sentiment: Float,
+    entities: [String],
     title: String,
     originalSources: String,
     sentence: String,
     language: String,
     source: String,
     properties: MessageProperties,
-    fullText: String
+    fullText: String,
+    link: String
   }
 
   type MessageProperties {

@@ -12,22 +12,26 @@ const trackEvent = require('../../clients/appinsights/AppInsightsClient').trackE
  */
 
 function eventToFeature(row) {
-  const FeatureType = 'Point';
+  const FeatureType = 'MultiPoint';
 
   return {
     type: FeatureType,
-    coordinates: [],
+    coordinates: row.computedfeatures.places.map(place=>[place.centroidlon, place.centroidlat]),
     properties: {
       edges: row.topics,
       messageid: row.eventid,
+      sourceeventid: row.sourceeventid,
+      entities: row.computedfeatures && row.computedfeatures.entities ? row.computedfeatures.entities.map(entity=>entity.name) : [],
       createdtime: row.eventtime,
-      sentiment: row.computedfeatures && row.computedfeatures.sentiment ? row.computedfeatures.sentiment : -1,
+      sentiment: row.computedfeatures && row.computedfeatures.sentiment ? row.computedfeatures.sentiment.neg_avg : -1,
       title: row.title,
-      sentence: row.
+      fullText: row.body,
+      //snippet: todo: bind field once it's available in the pipeline
       originalSources: row.externalsourceid,
       language: row.eventlangcode,
-      source: row.sourceurl,
-      fullText: row.body
+      source: row.pipelinekey,
+      fullText: row.body,
+      link: row.sourceurl
     }
   };
 }
@@ -55,12 +59,6 @@ function queryEventsTable(eventIdResponse, args) {
       eventsParams.push(`%${args.fulltextTerm}%`);
     }
 
-    const limit = parseLimit(args.limit);
-    if (limit) {
-      eventsQuery += ' LIMIT ?';
-      eventsParams.push(limit);
-    }
-
     cassandraConnector.executeQuery(eventsQuery, eventsParams)
     .then(rows => {
       const features = rows.map(eventToFeature);
@@ -68,7 +66,8 @@ function queryEventsTable(eventIdResponse, args) {
 
       resolve({
         type: 'FeatureCollection',
-        features, pageState
+        features, pageState,
+        bbox: args.bbox
       });
     })
     .catch(reject);
@@ -129,7 +128,6 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     if (!args.bbox || args.bbox.length !== 4) return reject('Invalid bbox specified');
     const [north, west, south, east] = args.bbox;
-    const PagingRate = 4;
 
     let tableName = "eventplaces";
     let tagsParams = [
@@ -159,10 +157,8 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
     ${args.sourceFilter ? ` AND pipelinekey IN('${args.sourceFilter.join('\',\'')}')` : ''}
     `.trim();
 
-    cassandraConnector.executeQueryWithPageState(tagsQuery, tagsParams, args.pageState, (parseLimit(args.limit) * PagingRate))
-    .then(response => {
-      return queryEventsTable(response, args);
-    })
+    cassandraConnector.executeQueryWithPageState(tagsQuery, tagsParams, args.pageState, parseLimit(args.limit))
+    .then(response => queryEventsTable(response, args))
     .then(resolve)
     .catch(reject);
   });
