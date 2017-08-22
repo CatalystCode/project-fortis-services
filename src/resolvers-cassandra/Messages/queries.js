@@ -137,8 +137,8 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
       west
     ];
 
-    if(args.originalSource){
-      tagsParams.push(args.originalSource);
+    if(args.externalsourceid){
+      tagsParams.push(args.externalsourceid);
       tableName = 'eventplacesbysource';
     }
 
