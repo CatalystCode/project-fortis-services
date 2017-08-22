@@ -112,10 +112,7 @@ function executeQueryWithPageState(query, params, pageState, fetchSize) {
 
       client.execute(query, params, options)
             .then(result => resolve(Object.assign({}, {pageState: result.pageState, rows: result.rows})))
-            .catch(exception => {
-              console.log('Error ' + exception);
-              reject(exception)
-            })
+            .catch(exception =>  reject(exception))
   });
 }
 
