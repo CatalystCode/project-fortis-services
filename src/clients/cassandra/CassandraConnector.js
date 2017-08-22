@@ -104,15 +104,18 @@ function executeQueryWithPageState(query, params, pageState, fetchSize) {
     const DEFAULT_FETCH = 15;
 
     let options = {
-      fetchSize: fetchSize || DEFAULT_FETCH
+      fetchSize: fetchSize > 0 ? fetchSize : DEFAULT_FETCH
     };
 
-    if(pageState)
+    if(pageState) {
       options.pageState = pageState;
+    }
+
+    console.log(query);
 
     client.execute(query, params, options)
-          .then(result => resolve(Object.assign({}, {pageState: result.pageState, rows: result.rows})))
-          .catch(exception =>  reject(exception));
+    .then(result => resolve(Object.assign({}, {pageState: result.pageState, rows: result.rows})))
+    .catch(exception =>  reject(exception));
   });
 }
 

@@ -126,7 +126,7 @@ function byLocation(args, res) { // eslint-disable-line no-unused-vars
 function byBbox(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     if (!args.bbox || args.bbox.length !== 4) return reject('Invalid bbox specified');
-    if(!args.conjunctivetopics || args.conjunctivetopics.length === 0) return reject('Empty conjunctive topic list specified');
+    if (!args.conjunctivetopics || args.conjunctivetopics.length === 0) return reject('Empty conjunctive topic list specified');
 
     const [north, west, south, east] = args.bbox;
 
@@ -138,10 +138,11 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
       east,
       args.fromDate,
       south,
-      west
+      west,
+      args.pipelinekeys
     ];
 
-    if(args.externalsourceid){
+    if (args.externalsourceid) {
       tagsParams.push(args.externalsourceid);
       tableName = 'eventplacesbysource';
     }
@@ -154,8 +155,8 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
     AND conjunctiontopic3 = ?
     AND (eventtime, centroidlat, centroidlon) <= (?, ?, ?)
     AND (eventtime, centroidlat, centroidlon) >= (?, ?, ?)
+    ${args.pipelinekeys ? ` AND pipelinekey IN ?` : ''}
     ${args.externalsourceid ? ' AND externalsourceid = ?' : ''}
-    ${args.pipelinekeys ? ` AND pipelinekey IN('${args.pipelinekeys.join('\',\'')}')` : ''}
     `.trim();
 
     cassandraConnector.executeQueryWithPageState(tagsQuery, tagsParams, args.pageState, parseLimit(args.limit))
