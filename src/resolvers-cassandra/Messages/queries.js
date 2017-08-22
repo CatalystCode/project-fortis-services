@@ -22,14 +22,14 @@ function eventToFeature(row) {
       messageid: row.eventid,
       sourceeventid: row.sourceeventid,
       entities: row.computedfeatures && row.computedfeatures.entities ? row.computedfeatures.entities.map(entity=>entity.name) : [],
-      createdtime: row.eventtime,
+      eventtime: row.eventtime,
       sentiment: row.computedfeatures && row.computedfeatures.sentiment ? row.computedfeatures.sentiment.neg_avg : -1,
       title: row.title,
       fullText: row.body,
-      //snippet: todo: bind field once it's available in the pipeline
-      originalSources: row.externalsourceid,
+      summary: row.summary,
+      externalsourceid: row.externalsourceid,
       language: row.eventlangcode,
-      source: row.pipelinekey,
+      pipelinekey: row.pipelinekey,
       link: row.sourceurl
     }
   };
@@ -120,7 +120,7 @@ function byLocation(args, res) { // eslint-disable-line no-unused-vars
 }
 
 /**
- * @param {site: string, originalSource: string, bbox: number[], mainTerm: string, filteredEdges: string[], langCode: string, limit: number, pageState: number, fromDate: string, toDate: string, sourceFilter: string[], fulltextTerm: string} args
+ * @param {site: string, externalsourceid: string, bbox: number[], mainTerm: string, filteredEdges: string[], langCode: string, limit: number, pageState: number, fromDate: string, toDate: string, pipelinekeys: string[], fulltextTerm: string} args
  * @returns {Promise.<{runTime: string, type: string, bbox: number[], features: Feature[]}>}
  **/
 function byBbox(args, res) { // eslint-disable-line no-unused-vars
@@ -139,8 +139,8 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
       west
     ];
 
-    if(args.originalSource){
-      tagsParams.push(args.originalSource);
+    if(args.externalsourceid){
+      tagsParams.push(args.externalsourceid);
       tableName = 'eventplacesbysource';
     }
 
@@ -152,8 +152,8 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
     AND conjunctiontopic3 = ?
     AND (eventtime, centroidlat, centroidlon) <= (?, ?, ?)
     AND (eventtime, centroidlat, centroidlon) >= (?, ?, ?)
-    ${args.originalSource ? ' AND externalsourceid = ?' : ''}
-    ${args.sourceFilter ? ` AND pipelinekey IN('${args.sourceFilter.join('\',\'')}')` : ''}
+    ${args.externalsourceid ? ' AND externalsourceid = ?' : ''}
+    ${args.pipelinekeys ? ` AND pipelinekey IN('${args.pipelinekeys.join('\',\'')}')` : ''}
     `.trim();
 
     cassandraConnector.executeQueryWithPageState(tagsQuery, tagsParams, args.pageState, parseLimit(args.limit))

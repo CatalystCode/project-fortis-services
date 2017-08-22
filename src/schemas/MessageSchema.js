@@ -2,11 +2,11 @@ const graphql = require('graphql');
 
 module.exports = graphql.buildSchema(`
   type Query {
-    byBbox(originalSource: String, 
+    byBbox(externalsourceid: String, 
            bbox: [Float]!, mainTerm: String, 
            filteredEdges: [String]!, langCode: String!, 
            limit: Int, pageState: String, fromDate: String!, toDate: String!,  
-           sourceFilter: [String], fulltextTerm: String): FeatureCollection
+           pipelinekeys: [String], fulltextTerm: String): FeatureCollection
     byLocation(site: String!, originalSource: String, coordinates: [Float]!, mainTerm: String, filteredEdges: [String]!, langCode: String!, limit: Int, offset: Int, fromDate: String!, toDate: String!, sourceFilter: [String], fulltextTerm: String): FeatureCollection
     byEdges(site: String!, mainTerm: String, 
             filteredEdges: [String]!, langCode: String!, 
@@ -81,16 +81,15 @@ module.exports = graphql.buildSchema(`
   type Message {
     edges: [String],
     messageid: ID,
-    createdtime: String,
+    eventtime: String,
     sourceeventid: String,
     sentiment: Float,
     entities: [String],
     title: String,
-    originalSources: String,
-    sentence: String,
+    externalsourceid: String,
+    summary: String,
     language: String,
-    source: String,
-    properties: MessageProperties,
+    pipelinekey: String,
     fullText: String,
     link: String
   }
