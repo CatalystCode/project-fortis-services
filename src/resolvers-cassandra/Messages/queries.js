@@ -2,19 +2,22 @@
 
 const Promise = require('promise');
 const translatorService = require('../../clients/translator/MsftTranslator');
+const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const { parseFromToDate, parseLimit, withRunTime, toPipelineKey, toConjunctionTopics, limitForInClause } = require('../shared');
-const { makeSet } = require('../../utils/collections');
+const { makeSet, makeMap } = require('../../utils/collections');
 const trackEvent = require('../../clients/appinsights/AppInsightsClient').trackEvent;
 
 /**
  * @typedef {type: string, coordinates: number[][], properties: {edges: string[], messageid: string, createdtime: string, sentiment: number, title: string, originalSources: string[], sentence: string, language: string, source: string, properties: {retweetCount: number, fatalaties: number, userConnecionCount: number, actor1: string, actor2: string, actor1Type: string, actor2Type: string, incidentType: string, allyActor1: string, allyActor2: string, title: string, link: string, originalSources: string[]}, fullText: string}} Feature
  */
 
-function eventToFeature(row) {
+function eventToFeature(row, placeIdToCentroid) {
   return {
     type: row.pipelinekey,
-    coordinates: [],
+    coordinates: row.placeids && row.placeids.length > 0
+      ? row.placeids.map(placeid => placeIdToCentroid[placeid]).filter(centroid => !!centroid)
+      : null,
     properties: {
       edges: row.topics,
       messageid: row.eventid,
@@ -27,6 +30,21 @@ function eventToFeature(row) {
       fullText: row.messagebody
     }
   };
+}
+
+function fetchCentroids(placeIds) {
+  return new Promise((resolve, reject) => {
+    if (!placeIds || !placeIds.length) {
+      return resolve({});
+    }
+
+    featureServiceClient.fetchById(placeIds, 'centroid')
+    .then(places => {
+      const placeIdToCentroid = makeMap(places, place => place.id, place => place.centroid);
+      resolve(placeIdToCentroid);
+    })
+    .catch(reject);
+  });
 }
 
 function queryEventsTable(rowsWithEventIds, args) {
@@ -62,11 +80,18 @@ function queryEventsTable(rowsWithEventIds, args) {
 
     cassandraConnector.executeQuery(eventsQuery, eventsParams)
     .then(rows => {
-      const features = rows.map(eventToFeature);
+      const placeIds = new Set();
+      rows.forEach(row => row.placeIds.forEach(placeId => placeIds.add(placeId)));
 
-      resolve({
-        features
-      });
+      fetchCentroids(Array.from(placeIds))
+      .then(placeIdToCentroid => {
+        const features = rows.map(row => eventToFeature(row, placeIdToCentroid));
+
+        resolve({
+          features
+        });
+      })
+      .catch(reject);
     })
     .catch(reject);
   });
@@ -227,9 +252,12 @@ function event(args, res) { // eslint-disable-line no-unused-vars
       if (!rows.length) return reject(`No event matching id ${args.messageId} found`);
       if (rows.length > 1) return reject(`Got more than one event with id ${args.messageId}`);
 
-      const feature = eventToFeature(rows[0]);
-
-      resolve(feature);
+      fetchCentroids(rows[0].placeids)
+      .then(placeIdToCentroid => {
+        const feature = eventToFeature(rows[0], placeIdToCentroid);
+        resolve(feature);
+      })
+      .catch(reject);
     })
     .catch(reject);
   });
