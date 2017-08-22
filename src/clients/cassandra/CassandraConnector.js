@@ -116,7 +116,7 @@ function executeQueryWithPageState(query, params, pageState, fetchSize) {
       pageState: result.pageState, 
       rows: result.rows
     }))
-    .catch(reject)
+    .catch(reject);
   });
 }
 

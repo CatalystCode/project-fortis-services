@@ -60,10 +60,10 @@ function queryEventsTable(eventIdResponse, args) {
 
     cassandraConnector.executeQuery(eventsQuery, eventsParams)
     .then(rows => resolve({
-        type: 'FeatureCollection',
-        features: rows.map(eventToFeature),
-        pageState: eventIdResponse.pageState,
-        bbox: args.bbox
+      type: 'FeatureCollection',
+      features: rows.map(eventToFeature),
+      pageState: eventIdResponse.pageState,
+      bbox: args.bbox
     }))
     .catch(reject);
   });
