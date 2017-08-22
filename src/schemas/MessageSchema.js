@@ -2,17 +2,9 @@ const graphql = require('graphql');
 
 module.exports = graphql.buildSchema(`
   type Query {
-<<<<<<< HEAD
     byBbox(externalsourceid: String, bbox: [Float]!, conjunctivetopics: [String]!, 
            limit: Int, pageState: String, zoomLevel: Int!, fromDate: String!, toDate: String!,  
            pipelinekeys: [String]!, fulltextTerm: String): FeatureCollection
-=======
-    byBbox(site: String!, originalSource: String, 
-           bbox: [Float]!, mainTerm: String, 
-           filteredEdges: [String]!, langCode: String!, 
-           limit: Int, pageState: String, fromDate: String!, toDate: String!,  
-           sourceFilter: [String], fulltextTerm: String): FeatureCollection
->>>>>>> A variety of fixes to support showing fortis events in the news feed.
     byLocation(site: String!, originalSource: String, coordinates: [Float]!, mainTerm: String, filteredEdges: [String]!, langCode: String!, limit: Int, offset: Int, fromDate: String!, toDate: String!, sourceFilter: [String], fulltextTerm: String): FeatureCollection
     byEdges(site: String!, mainTerm: String, 
             filteredEdges: [String]!, langCode: String!, 
@@ -87,11 +79,7 @@ module.exports = graphql.buildSchema(`
   type Message {
     edges: [String],
     messageid: ID,
-<<<<<<< HEAD
     eventtime: String,
-=======
-    createdtime: String,
->>>>>>> A variety of fixes to support showing fortis events in the news feed.
     sourceeventid: String,
     sentiment: Float,
     entities: [String],
@@ -99,31 +87,8 @@ module.exports = graphql.buildSchema(`
     externalsourceid: String,
     summary: String,
     language: String,
-<<<<<<< HEAD
     pipelinekey: String,
     fullText: String,
     link: String
-=======
-    source: String,
-    properties: MessageProperties,
-    fullText: String,
-    link: String
-  }
-
-  type MessageProperties {
-    retweetCount: Int,
-    fatalaties: Int,
-    userConnecionCount: Int,
-    actor1: String,
-    actor2: String,
-    actor1Type: String,
-    actor2Type: String,
-    incidentType: String,
-    allyActor1: String,
-    allyActor2: String,
-    title: String,
-    link: String,
-    originalSources: [String]
->>>>>>> A variety of fixes to support showing fortis events in the news feed.
   }
 `);
