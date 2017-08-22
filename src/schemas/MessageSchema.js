@@ -2,9 +2,7 @@ const graphql = require('graphql');
 
 module.exports = graphql.buildSchema(`
   type Query {
-    byBbox(externalsourceid: String, 
-           bbox: [Float]!, mainTerm: String, 
-           filteredEdges: [String]!, langCode: String!, 
+    byBbox(externalsourceid: String, bbox: [Float]!, conjunctivetopics: [String]!, 
            limit: Int, pageState: String, fromDate: String!, toDate: String!,  
            pipelinekeys: [String], fulltextTerm: String): FeatureCollection
     byLocation(site: String!, originalSource: String, coordinates: [Float]!, mainTerm: String, filteredEdges: [String]!, langCode: String!, limit: Int, offset: Int, fromDate: String!, toDate: String!, sourceFilter: [String], fulltextTerm: String): FeatureCollection
