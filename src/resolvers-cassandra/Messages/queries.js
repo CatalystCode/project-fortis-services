@@ -126,7 +126,7 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
 
     const [north, west, south, east] = args.bbox;
 
-    let tableName = "eventplaces";
+    let tableName = 'eventplaces';
     let tagsParams = [
       ...toConjunctionTopics(args.mainTerm, args.filteredEdges),
       args.toDate,
@@ -139,7 +139,7 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
 
     if(args.originalSource){
       tagsParams.push(args.originalSource);
-      tableName = "eventplacesbysource";
+      tableName = 'eventplacesbysource';
     }
 
     let tableName = 'eventplaces';
