@@ -125,6 +125,23 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
     if (!args.conjunctivetopics.length) return reject('Empty conjunctive topic list specified');
 
     const [north, west, south, east] = args.bbox;
+    const PagingRate = 4;
+
+    let tableName = "eventplaces";
+    let tagsParams = [
+      ...toConjunctionTopics(args.mainTerm, args.filteredEdges),
+      args.toDate,
+      north,
+      east,
+      args.fromDate,
+      south,
+      west
+    ];
+
+    if(args.originalSource){
+      tagsParams.push(args.originalSource);
+      tableName = "eventplacesbysource";
+    }
 
     let tableName = 'eventplaces';
     let tagsParams = [
