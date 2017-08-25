@@ -143,23 +143,6 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
       tableName = 'eventplacesbysource';
     }
 
-    let tableName = 'eventplaces';
-    let tagsParams = [
-      ...fromTopicListToConjunctionTopics(args.conjunctivetopics),
-      args.toDate,
-      north,
-      east,
-      args.fromDate,
-      south,
-      west,
-      args.pipelinekeys
-    ];
-
-    if (args.externalsourceid) {
-      tagsParams.push(args.externalsourceid);
-      tableName = 'eventplacesbysource';
-    }
-
     const tagsQuery = `
     SELECT eventid
     FROM fortis.${tableName}
