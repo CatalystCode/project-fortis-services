@@ -5,7 +5,7 @@ module.exports = graphql.buildSchema(`
     conjunctiveterms(fromDate: String!, periodType: String!, toDate: String!, pipelinekeys: [String]!, mainTerm: String!, bbox: [Float], zoomLevel: Int, externalsourceid: String): TermCollection
     timeSeries(fromDate: String!, toDate: String!, pipelinekeys: [String]!, conjunctivetopics: [String]!, bbox: [Float], zoomLevel: Int, externalsourceid: String): FeatureTimeSeriesCollection
     topLocations(limit: Int!, fromDate: String!, periodType: String!, toDate: String!, pipelinekeys: [String]!, conjunctivetopics: [String]!, bbox: [Float], zoomLevel: Int, externalsourceid: String): TopPlacesCollection
-    topSources(site: String!, fromDate: String!, toDate: String!, sourceFilter: [String], mainTerm: String, limit: Int!, bbox: [Float], zoomLevel: Int, originalSource: String): TopSourcesCollection
+    topSources(limit: Int!, fromDate: String!, periodType: String!, toDate: String!, pipelinekeys: [String]!, conjunctivetopics: [String]!, bbox: [Float], zoomLevel: Int, externalsourceid: String): TopSourcesCollection
     topTerms(limit: Int!, fromDate: String!, periodType: String!, toDate: String!, pipelinekeys: [String]!, conjunctivetopics: [String]!, bbox: [Float], zoomLevel: Int, externalsourceid: String): TopTermsCollection
   }
 
