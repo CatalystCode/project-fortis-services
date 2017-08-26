@@ -257,8 +257,6 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
       } ) )
       .slice(0, responseSize);
 
-      const edges = Array.from(accumulationMap.values()).map(source => Object.assign({}, source, { avgsentiment:  computeWeightedAvg(source.mentions, source.avgsentimentnumerator) }));
-      
       resolve({
         edges
       });
