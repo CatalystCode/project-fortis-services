@@ -8,6 +8,24 @@ const { tilesForBbox, parseFromToDate, withRunTime, toPipelineKey, aggregateBy, 
 const { makeSet, makeMap, makeMultiMap } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
+function _aggregateBy(rows, aggregateKey, aggregateValue){
+  let accumulationMap = new Map();
+
+  rows.forEach(row => {
+    const key = aggregateKey(row);
+    const mapEntry = accumulationMap.has(key) ? accumulationMap.get(key) : aggregateValue(row);
+
+    const mutatedRow = Object.assign({}, mapEntry, { 
+      mentions: (mapEntry.mentions || Long.ZERO).add(row.mentioncount),
+      avgsentimentnumerator: (mapEntry.avgsentimentnumerator || Long.ZERO).add(row.avgsentimentnumerator) 
+    });
+
+    accumulationMap.set(key, mutatedRow);
+  });
+
+  return accumulationMap;
+ }
+
 /**
  * @param {{site: string, timespan: string, sourceFilter: string[], mainEdge: string, originalSource: string}} args
  * @returns {Promise.<{runTime: string, edges: Array<{name: string, mentions: number, coordinates: number[], population: number}>}>}
@@ -187,6 +205,8 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
       } ) )
       .slice(0, responseSize);
 
+      const edges = Array.from(accumulationMap.values()).map(source => Object.assign({}, source, { avgsentiment:  computeWeightedAvg(source.mentions, source.avgsentimentnumerator) }));
+      
       resolve({
         edges
       });
