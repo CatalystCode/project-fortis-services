@@ -137,7 +137,6 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
     const tiles = tilesForBbox(args.bbox, args.zoomLevel);
     const MaxFetchedRows = 10000;
     const MinMentionCount = 1;
-    const NumberOfDistinctSources = 8;
     const MaxMentionCount = 1000000000;
     const tilex = makeSet(tiles, tile => tile.row);
     const tiley = makeSet(tiles, tile => tile.column);
