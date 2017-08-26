@@ -3,6 +3,14 @@
 const Promise = require('promise');
 const geotile = require('geotile');
 
+function _sortByMentionCount(rows) {
+  return rows.sort((a, b) => b.mentions - a.mentions);
+}
+
+function _computeWeightedSentiment(rows) {
+  return rows.map(row => Object.assign({}, row, { avgsentiment:  computeWeightedAvg(row.mentions, row.avgsentimentnumerator) }))
+}
+
 function withRunTime(promiseFunc) {
   function runTimer(...args) {
     return new Promise((resolve, reject) => {
@@ -43,6 +51,24 @@ function toPipelineKey(sourceFilter) {
 
   return sourceFilter[0];
 }
+
+function aggregateBy(rows, aggregateKey, aggregateValue) {
+  let accumulationMap = new Map();
+
+  rows.forEach(row => {
+    const key = aggregateKey(row);
+    const mapEntry = accumulationMap.has(key) ? accumulationMap.get(key) : aggregateValue(row);
+
+    const mutatedRow = Object.assign({}, mapEntry, { 
+      mentions: (mapEntry.mentions || Long.ZERO).add(row.mentioncount),
+      avgsentimentnumerator: (mapEntry.avgsentimentnumerator || Long.ZERO).add(row.avgsentimentnumerator) 
+    });
+
+    accumulationMap.set(key, mutatedRow);
+  });
+
+  return _sortByMentionCount(_computeWeightedSentiment(Array.from(accumulationMap.values())));
+ }
 
 function computeWeightedAvg(mentioncount, weightedavgnumerator) {
   const DoubleToLongConversionFactor = 1000;
@@ -112,6 +138,7 @@ module.exports = {
   tilesForLocations,
   computeWeightedAvg,
   limitForInClause,
+  aggregateBy,
   fromTopicListToConjunctionTopics,
   withRunTime: withRunTime
 };
