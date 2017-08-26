@@ -51,11 +51,11 @@ function terms(args, res) { // eslint-disable-line no-unused-vars
     ];
 
     cassandraConnector.executeQuery(query, params)
-    .then(rows => {
+    .then(rows => 
       resolve({
-          edges: rows.map(item=>transformWatchlist(item, args.translationLanguage))
-        })
-    }).catch(reject);
+        edges: rows.map(item=>transformWatchlist(item, args.translationLanguage))
+      })
+    ).catch(reject);
   });
 }
 
