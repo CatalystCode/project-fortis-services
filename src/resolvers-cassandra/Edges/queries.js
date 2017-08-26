@@ -128,13 +128,14 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
 }
 
 /**
- * @param {{limit: Int!, fromDate: String!, periodType: String!, toDate: String!, pipelinekeys: [String]!, conjunctivetopics: [String]!, bbox: [Float], zoomLevel: Int}} args
+ * @param {{limit: Int!, fromDate: String!, periodType: String!, toDate: String!, pipelinekeys: String!, conjunctivetopics: [String]!, bbox: [Float], zoomLevel: Int}} args
  * @returns {Promise.<{sources: Array<{Name: string, Count: number, Source: string}>}>}
  */
 function topSources(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const tiles = tilesForBbox(args.bbox, args.zoomLevel);
     const MinMentionCount = 1;
+    const NumberOfDistinctSources = 8;
     const MaxMentionCount = 1000000000;
     const tilex = makeSet(tiles, tile => tile.row);
     const tiley = makeSet(tiles, tile => tile.column);
@@ -169,12 +170,19 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
       Math.min(...tiley),
       args.fromDate,
       args.fromDate,
-      fetchSize
+      fetchSize + NumberOfDistinctSources
     ];
 
     return cassandraConnector.executeQuery(query, params)
     .then(rows => {
-      const edges = rows.map(row => ({name: row.externalsourceid, mentions: row.mentioncount, pipelinekey: row.pipelinekey, avgsentiment: computeWeightedAvg(row.mentioncount, row.avgsentimentnumerator)}));
+      const edges = rows
+      .filter(row=>row.pipelinekey !== "all" || row.externalsourceid !== "all")//filter all aggregates as we're interested in named sources only
+      .map(row => ( {
+        name: row.externalsourceid, 
+        mentions: row.mentioncount, 
+        pipelinekey: row.pipelinekey, 
+        avgsentiment: computeWeightedAvg(row.mentioncount, row.avgsentimentnumerator)
+      }));
 
       resolve({
         edges
