@@ -177,7 +177,7 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
 
     return cassandraConnector.executeQuery(query, params, { fetchSize })
     .then(rows => {
-      const filteredRows = rows.filter(row=>row.pipelinekey !== 'all' || row.externalsourceid !== 'all')//filter all aggregates as we're interested in named sources only
+      const filteredRows = rows.filter(row=>row.pipelinekey !== 'all' || row.externalsourceid !== 'all');//filter all aggregates as we're interested in named sources only
       const edges = aggregateBy(filteredRows, row => `${row.pipelinekey}_${row.externalsourceid}`, row => ( { 
         pipelinekey: row.pipelinekey, 
         name: row.externalsourceid, 

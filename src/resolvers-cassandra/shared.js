@@ -75,7 +75,7 @@ function aggregateBy(rows, aggregateKey, aggregateValue) {
   });
 
   return _sortByMentionCount(_computeWeightedSentiment(Array.from(accumulationMap.values())));
- }
+}
 
 function fromTopicListToConjunctionTopics(topicTerms) {
   const conjunctiveTopicLimit = 3;
