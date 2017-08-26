@@ -1,6 +1,7 @@
 'use strict';
 
 const Promise = require('promise');
+const Long = require('cassandra-driver').types.Long;
 const geotile = require('geotile');
 
 function _sortByMentionCount(rows) {
@@ -8,7 +9,7 @@ function _sortByMentionCount(rows) {
 }
 
 function _computeWeightedSentiment(rows) {
-  return rows.map(row => Object.assign({}, row, { avgsentiment:  _computeWeightedAvg(row.mentions, row.avgsentimentnumerator) }))
+  return rows.map(row => Object.assign({}, row, { avgsentiment:  _computeWeightedAvg(row.mentions, row.avgsentimentnumerator) }));
 }
 
 function _computeWeightedAvg(mentioncount, weightedavgnumerator) {
