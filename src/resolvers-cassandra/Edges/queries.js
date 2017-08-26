@@ -3,7 +3,7 @@
 const Promise = require('promise');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { tilesForBbox, parseFromToDate, withRunTime, toPipelineKey, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
+const { tilesForBbox, parseFromToDate, withRunTime, toPipelineKey, computeWeightedAvg, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
 const { makeSet, makeMap, makeMultiMap } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
@@ -174,7 +174,7 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
 
     return cassandraConnector.executeQuery(query, params)
     .then(rows => {
-      const edges = rows.map(row => ({name: row.externalsourceid, mentions: row.mentioncount, pipelinekey: row.pipelinekey, avgsentiment: row.avgsentimentnumerator / row.mentioncount}));
+      const edges = rows.map(row => ({name: row.externalsourceid, mentions: row.mentioncount, pipelinekey: row.pipelinekey, avgsentiment: computeWeightedAvg(row.mentioncount, row.avgsentimentnumerator)}));
 
       resolve({
         edges

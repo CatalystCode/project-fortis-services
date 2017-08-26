@@ -44,6 +44,12 @@ function toPipelineKey(sourceFilter) {
   return sourceFilter[0];
 }
 
+function computeWeightedAvg(mentioncount, weightedavgnumerator) {
+  const DoubleToLongConversionFactor = 1000;
+
+  return mentioncount > 0 ? (weightedavgnumerator / DoubleToLongConversionFactor) / mentioncount : 0;
+}
+
 function fromTopicListToConjunctionTopics(topicTerms) {
   const conjunctiveTopicLimit = 3;
   let selectedFilters = topicTerms.filter(edge => !!edge).slice(0, conjunctiveTopicLimit).sort();
@@ -104,6 +110,7 @@ module.exports = {
   toConjunctionTopics,
   tilesForBbox,
   tilesForLocations,
+  computeWeightedAvg,
   limitForInClause,
   fromTopicListToConjunctionTopics,
   withRunTime: withRunTime
