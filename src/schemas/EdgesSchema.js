@@ -41,7 +41,7 @@ module.exports = graphql.buildSchema(`
 
   type TopTermsCollection{
     runTime: String,
-    edges: [ExternalSource]!
+    edges: [Term]!
   }
 
   type TermCollection {

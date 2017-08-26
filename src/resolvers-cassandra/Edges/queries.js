@@ -129,6 +129,67 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
 }
 
 /**
+ * @param {{limit: Int!, fromDate: String!, periodType: String!, toDate: String!, externalsourceid: String!, pipelinekey: String!, bbox: [Float], zoomLevel: Int}} args
+ * @returns {Promise.<{edges: Array<{name: string, mentions: number, avgsentiment: float}>}>}
+ */
+function topTerms(args, res) { // eslint-disable-line no-unused-vars
+  return new Promise((resolve, reject) => {
+    console.log('called');
+    const tiles = tilesForBbox(args.bbox, args.zoomLevel);
+    const MaxFetchedRows = 10000;
+    const MinMentionCount = 1;
+    const MaxMentionCount = 1000000000;
+    const tilex = makeSet(tiles, tile => tile.row);
+    const tiley = makeSet(tiles, tile => tile.column);
+    const fetchSize = 400;
+    const responseSize = args.limit || 5;
+
+    const query = `
+    SELECT mentioncount, conjunctiontopic1, avgsentimentnumerator
+    FROM fortis.populartopics
+    WHERE periodtype = ?
+    AND tilez = ?
+    AND pipelinekey = ?
+    AND externalsourceid = ?
+    AND (mentioncount, tilex, tiley, periodstartdate, periodenddate) <= (?, ?, ?, ?, ?)
+    AND (mentioncount, tilex, tiley, periodstartdate, periodenddate) >= (?, ?, ?, ?, ?)
+    LIMIT ?
+    `.trim();
+
+    const params = [
+      args.periodType,
+      args.zoomLevel,
+      args.pipelinekey,
+      args.externalsourceid,
+      MaxMentionCount,
+      Math.max(...tilex),
+      Math.max(...tiley),
+      args.toDate,
+      args.toDate,
+      MinMentionCount,
+      Math.min(...tilex),
+      Math.min(...tiley),
+      args.fromDate,
+      args.fromDate,
+      MaxFetchedRows
+    ];
+
+    return cassandraConnector.executeQuery(query, params, { fetchSize })
+    .then(rows => 
+      resolve({
+        edges: aggregateBy(rows, row => `${row.conjunctiontopic1}`, row => ( { 
+          name: row.conjunctiontopic1, 
+          mentions: Long.ZERO, 
+          avgsentimentnumerator: Long.ZERO 
+        } ) )
+        .slice(0, responseSize)
+      })
+    )
+    .catch(reject);
+  });
+}
+
+/**
  * @param {{limit: Int!, fromDate: String!, periodType: String!, toDate: String!, pipelinekeys: String!, conjunctivetopics: [String]!, bbox: [Float], zoomLevel: Int}} args
  * @returns {Promise.<{sources: Array<{Name: string, Count: number, Source: string}>}>}
  */
@@ -197,5 +258,6 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
 module.exports = {
   popularLocations: trackEvent(withRunTime(popularLocations), 'popularLocations'),
   timeSeries: trackEvent(timeSeries, 'timeSeries'),
+  topTerms: trackEvent(topTerms, 'topTerms'),
   topSources: trackEvent(topSources, 'topSources')
 };
