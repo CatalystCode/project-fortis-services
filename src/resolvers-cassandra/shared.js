@@ -8,7 +8,13 @@ function _sortByMentionCount(rows) {
 }
 
 function _computeWeightedSentiment(rows) {
-  return rows.map(row => Object.assign({}, row, { avgsentiment:  computeWeightedAvg(row.mentions, row.avgsentimentnumerator) }))
+  return rows.map(row => Object.assign({}, row, { avgsentiment:  _computeWeightedAvg(row.mentions, row.avgsentimentnumerator) }))
+}
+
+function _computeWeightedAvg(mentioncount, weightedavgnumerator) {
+  const DoubleToLongConversionFactor = 1000;
+
+  return !mentioncount.isZero() ? (weightedavgnumerator / DoubleToLongConversionFactor) / mentioncount : 0;
 }
 
 function withRunTime(promiseFunc) {
@@ -70,12 +76,6 @@ function aggregateBy(rows, aggregateKey, aggregateValue) {
   return _sortByMentionCount(_computeWeightedSentiment(Array.from(accumulationMap.values())));
  }
 
-function computeWeightedAvg(mentioncount, weightedavgnumerator) {
-  const DoubleToLongConversionFactor = 1000;
-
-  return !mentioncount.isZero() ? (weightedavgnumerator / DoubleToLongConversionFactor) / mentioncount : 0;
-}
-
 function fromTopicListToConjunctionTopics(topicTerms) {
   const conjunctiveTopicLimit = 3;
   let selectedFilters = topicTerms.filter(edge => !!edge).slice(0, conjunctiveTopicLimit).sort();
@@ -136,7 +136,6 @@ module.exports = {
   toConjunctionTopics,
   tilesForBbox,
   tilesForLocations,
-  computeWeightedAvg,
   limitForInClause,
   aggregateBy,
   fromTopicListToConjunctionTopics,
