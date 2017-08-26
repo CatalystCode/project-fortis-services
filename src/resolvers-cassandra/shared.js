@@ -103,6 +103,7 @@ module.exports = {
   toConjunctionTopics,
   tilesForBbox,
   tilesForLocations,
+  computeWeightedAvg,
   limitForInClause,
   fromTopicListToConjunctionTopics,
   withRunTime: withRunTime
