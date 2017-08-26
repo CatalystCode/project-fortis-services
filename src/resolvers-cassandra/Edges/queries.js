@@ -232,11 +232,19 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
           avgsentimentnumerator: Long.ZERO
         })).slice(0, responseSize);
 
+<<<<<<< HEAD
         resolve({
           edges
         });
       })
       .catch(reject);
+=======
+      resolve({
+        edges
+      });
+    })
+    .catch(reject);
+>>>>>>> Reorganizing aggregation logic
   });
 }
 
