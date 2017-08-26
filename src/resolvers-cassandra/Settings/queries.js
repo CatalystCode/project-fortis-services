@@ -26,7 +26,7 @@ function cassandraRowToSite(row) {
 }
 
 function transformWatchlist(item, translatedlanguage){
-  const DefaultLanguage = "en";
+  const DefaultLanguage = 'en';
 
   return {
     name: item.topic,
