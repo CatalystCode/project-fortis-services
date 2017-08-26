@@ -245,11 +245,19 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
         }))
           .slice(0, responseSize);
 
+<<<<<<< HEAD
         resolve({
           edges
         });
       })
       .catch(reject);
+=======
+      resolve({
+        edges
+      });
+    })
+    .catch(reject);
+>>>>>>> Reorganizing aggregation logic
   });
 }
 
