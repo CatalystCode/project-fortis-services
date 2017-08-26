@@ -1,11 +1,30 @@
 'use strict';
 
 const Promise = require('promise');
+const Long = require('cassandra-driver').types.Long;
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
 const { tilesForBbox, parseFromToDate, withRunTime, toPipelineKey, computeWeightedAvg, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
 const { makeSet, makeMap, makeMultiMap } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
+
+function _aggregateBy(rows, aggregateKey, aggregateValue){
+  let accumulationMap = new Map();
+
+  rows.forEach(row => {
+    const key = aggregateKey(row);
+    const mapEntry = accumulationMap.has(key) ? accumulationMap.get(key) : aggregateValue(row);
+
+    const mutatedRow = Object.assign({}, mapEntry, { 
+      mentions: (mapEntry.mentions || Long.ZERO).add(row.mentioncount),
+      avgsentimentnumerator: (mapEntry.avgsentimentnumerator || Long.ZERO).add(row.avgsentimentnumerator) 
+    });
+
+    accumulationMap.set(key, mutatedRow);
+  });
+
+  return accumulationMap;
+ }
 
 /**
  * @param {{site: string, timespan: string, sourceFilter: string[], mainEdge: string, originalSource: string}} args
@@ -134,12 +153,13 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
 function topSources(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const tiles = tilesForBbox(args.bbox, args.zoomLevel);
+    const MaxFetchedRows = 10000;
     const MinMentionCount = 1;
     const NumberOfDistinctSources = 8;
     const MaxMentionCount = 1000000000;
     const tilex = makeSet(tiles, tile => tile.row);
     const tiley = makeSet(tiles, tile => tile.column);
-    const fetchSize = args.limit || 5;
+    const fetchSize = 400;
 
     const query = `
     SELECT mentioncount, pipelinekey, externalsourceid, avgsentimentnumerator
@@ -170,20 +190,21 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
       Math.min(...tiley),
       args.fromDate,
       args.fromDate,
-      fetchSize + NumberOfDistinctSources
+      MaxFetchedRows
     ];
 
-    return cassandraConnector.executeQuery(query, params)
+    return cassandraConnector.executeQuery(query, params, { fetchSize })
     .then(rows => {
-      const edges = rows
-      .filter(row=>row.pipelinekey !== "all" || row.externalsourceid !== "all")//filter all aggregates as we're interested in named sources only
-      .map(row => ( {
-        name: row.externalsourceid, 
-        mentions: row.mentioncount, 
+      const filteredRows = rows.filter(row=>row.pipelinekey !== "all" || row.externalsourceid !== "all")//filter all aggregates as we're interested in named sources only
+      const accumulationMap = _aggregateBy(filteredRows, row => `${row.pipelinekey}_${row.externalsourceid}`, row => ( { 
         pipelinekey: row.pipelinekey, 
-        avgsentiment: computeWeightedAvg(row.mentioncount, row.avgsentimentnumerator)
-      }));
+        name: row.externalsourceid, 
+        mentions: Long.ZERO, 
+        avgsentimentnumerator: Long.ZERO 
+      } ) );
 
+      const edges = Array.from(accumulationMap.values()).map(source => Object.assign({}, source, { avgsentiment:  computeWeightedAvg(source.mentions, source.avgsentimentnumerator) }));
+      
       resolve({
         edges
       });

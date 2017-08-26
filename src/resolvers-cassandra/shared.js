@@ -47,7 +47,7 @@ function toPipelineKey(sourceFilter) {
 function computeWeightedAvg(mentioncount, weightedavgnumerator) {
   const DoubleToLongConversionFactor = 1000;
 
-  return mentioncount > 0 ? (weightedavgnumerator / DoubleToLongConversionFactor) / mentioncount : 0;
+  return !mentioncount.isZero() ? (weightedavgnumerator / DoubleToLongConversionFactor) / mentioncount : 0;
 }
 
 function fromTopicListToConjunctionTopics(topicTerms) {
