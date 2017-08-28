@@ -4,5 +4,5 @@ const queries = require('./queries');
 
 module.exports = {
   heatmapFeaturesByTile: queries.heatmapFeaturesByTile,
-  fetchTilesByLocations: queries.fetchTilesByLocations
+  fetchTileIdsByPlaceId: queries.fetchTileIdsByPlaceId
 };

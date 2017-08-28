@@ -3,7 +3,7 @@ const graphql = require('graphql');
 module.exports = graphql.buildSchema(`
   type Query {
     heatmapFeaturesByTile(fromDate: String!, toDate: String!, periodType: String!, pipelinekeys: [String]!, maintopic: String!, conjunctivetopics: [String], tiley: Int!, tilex: Int!, zoomLevel: Int!, externalsourceid: String!): FeatureCollection,
-    fetchTilesByLocations(site: String!, locations: [[Float]]!, mainEdge: String, zoomLevel: Int, filteredEdges: [String], timespan: String!, sourceFilter: [String], fromDate: String, toDate: String): FeatureCollection,
+    fetchTileIdsByPlaceId(placeid: String!, zoomLevel: Int!): [TileId],
   }
 
   enum TypeEnum {
@@ -18,6 +18,13 @@ module.exports = graphql.buildSchema(`
     runTime: String,
     type: TypeEnum!,
     features: [Feature]!
+  }
+
+  type TileId {
+    id: String
+    zoom: Int
+    row: Int
+    column: Int
   }
 
   type Feature {
