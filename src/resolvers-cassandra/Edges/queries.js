@@ -4,8 +4,8 @@ const Promise = require('promise');
 const Long = require('cassandra-driver').types.Long;
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { tilesForBbox, parseFromToDate, withRunTime, toPipelineKey, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
-const { makeSet, makeMap, makeMultiMap, computeWeightedAvg, aggregateBy } = require('../../utils/collections');
+const { tilesForBbox, withRunTime, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
+const { makeSet, makeMap, aggregateBy } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
 const MaxFetchedRows = 10000;
@@ -67,22 +67,21 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
           coordinates: [row.centroidlat, row.centroidlon]
         }));
 
-      resolve({
-        edges: aggregateBy(edges, row => `${row.placeid}`, row => ( { 
-          name: row.name,
-          coordinates: row.coordinates,
-          placeid: row.placeid,
-          mentions: Long.ZERO, 
-          layer: row.layer,
-          avgsentimentnumerator: Long.ZERO 
-        } ) )
+        resolve({
+          edges: aggregateBy(edges, row => `${row.placeid}`, row => ( { 
+            name: row.name,
+            coordinates: row.coordinates,
+            placeid: row.placeid,
+            mentions: Long.ZERO, 
+            layer: row.layer,
+            avgsentimentnumerator: Long.ZERO 
+          } ) )
         .slice(0, responseSize)
+        });
       })
-    })
     .catch(reject);
-  })
-  .catch(reject);;
-});
+    });
+  });
 }
 
 /**
