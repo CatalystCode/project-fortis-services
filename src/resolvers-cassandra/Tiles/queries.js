@@ -5,7 +5,7 @@ const geotile = require('geotile');
 const Long = require('cassandra-driver').types.Long;
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { tilesForBbox, tilesForLocations, withRunTime, toConjunctionTopics } = require('../shared');
+const { tilesForBbox, withRunTime, toConjunctionTopics } = require('../shared');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 const { computeWeightedAvg } = require('../../utils/collections');
 
