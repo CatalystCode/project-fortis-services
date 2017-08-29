@@ -17,20 +17,18 @@ function heatmapToFeatures(feature) {
   const tileIds = Object.keys(heatmap);
   const type = 'Point';
   
-  return tileIds.map(tileId => {
-    const { mentioncountagg, avgsentimentagg } = heatmap[tileId];
+  return tileIds.map(id => {
+    const { mentioncountagg, avgsentimentagg } = heatmap[id];
     const mentions = Long.fromInt(mentioncountagg);
     const avgsentiment = Long.fromInt(avgsentimentagg);
     const date = feature.periodstartdate;
-    const { row, column, zoom } = geotile.tileFromTileId(tileId);
+    const { row, column, zoom } = geotile.tileFromTileId(id);
     const coordinates = [geotile.longitudeFromColumn(column, zoom), geotile.latitudeFromRow(row, zoom)];
     const properties = {
       mentions: mentioncountagg,
       avgsentiment: computeWeightedAvg(mentions, avgsentiment),
       date: date,
-      tilex: column,
-      tiley: row,
-      tilez: zoom
+      tile: { row, zoom, column, id }
     };
 
     return { properties, coordinates, type };

@@ -37,8 +37,6 @@ module.exports = graphql.buildSchema(`
     mentions: Int
     date: String
     avgsentiment: Float
-    tilex: Int
-    tiley: Int
-    tilez: Int
+    tile: TileId
   }
 `);
