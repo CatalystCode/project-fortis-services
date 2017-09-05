@@ -10,8 +10,6 @@ const { makeSet, makeMap, aggregateBy } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
 const MaxFetchedRows = 10000;
-const MinMentionCount = 1;
-const MaxMentionCount = 1000000000;
 
 /**
  * @param {{limit: Int!, fromDate: String!, periodType: String!, toDate: String!, externalsourceid: String!, pipelinekeys: [String]!, bbox: [Float]}} args
@@ -92,9 +90,6 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
  */
 function timeSeries(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    const tiles = tilesForBbox(args.bbox, args.zoomLevel);
-    const tilex = makeSet(tiles, tile => tile.column);
-    const tiley = makeSet(tiles, tile => tile.row);
     const conjunctivetopics = args.maintopics.length > 1 ? [] : args.conjunctivetopics;
     
     const MaxConjunctiveTopicsAllowed = 2;
@@ -165,9 +160,6 @@ function locations(args, res) { // eslint-disable-line no-unused-vars
  */
 function topTerms(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    const tiles = tilesForBbox(args.bbox, args.zoomLevel);
-    const tilex = makeSet(tiles, tile => tile.column);
-    const tiley = makeSet(tiles, tile => tile.row);
     const fetchSize = 400;
     const responseSize = args.limit || 5;
 
@@ -215,9 +207,6 @@ function topTerms(args, res) { // eslint-disable-line no-unused-vars
  */
 function topSources(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    const tiles = tilesForBbox(args.bbox, args.zoomLevel);
-    const tilex = makeSet(tiles, tile => tile.column);
-    const tiley = makeSet(tiles, tile => tile.row);
     const fetchSize = 400;
     const responseSize = args.limit || 5;
 
@@ -270,9 +259,6 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
  */
 function conjunctiveTopics(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    const tiles = tilesForBbox(args.bbox, args.zoomLevel);
-    const tilex = makeSet(tiles, tile => tile.column);
-    const tiley = makeSet(tiles, tile => tile.row);
     const fetchSize = 400;
 
     const query = `
