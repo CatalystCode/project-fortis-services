@@ -93,7 +93,7 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     const conjunctivetopics = args.maintopics.length > 1 ? [] : args.conjunctivetopics;
     
     const MaxConjunctiveTopicsAllowed = 2;
-    const dateFormat = "YYYY-MM-DD HH:mm"
+    const dateFormat = 'YYYY-MM-DD HH:mm';
 
     const query = `
     SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator
