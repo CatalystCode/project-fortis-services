@@ -1,7 +1,6 @@
 'use strict';
 
 const Promise = require('promise');
-const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
 const facebookAnalyticsClient = require('../../clients/facebook/FacebookAnalyticsClient');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const {withRunTime, getSiteDefintion} = require('../shared');
