@@ -94,10 +94,14 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     
     const MaxConjunctiveTopicsAllowed = 2;
 <<<<<<< HEAD
+<<<<<<< HEAD
     const dateFormat = 'YYYY-MM-DD HH:mm';
 =======
     const dateFormat = "YYYY-MM-DD HH:mm"
 >>>>>>> Refactored services to integrate reoptimized cassandra tables
+=======
+    const dateFormat = 'YYYY-MM-DD HH:mm';
+>>>>>>> Fixing lint errors
 
     const query = `
     SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator
