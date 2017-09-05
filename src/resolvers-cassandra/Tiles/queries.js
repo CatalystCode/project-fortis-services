@@ -2,7 +2,6 @@
 
 const Promise = require('promise');
 const geotile = require('geotile');
-const Long = require('cassandra-driver').types.Long;
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
 const { tilesForBbox, withRunTime, toConjunctionTopics } = require('../shared');

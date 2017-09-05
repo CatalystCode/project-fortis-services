@@ -1,7 +1,6 @@
 'use strict';
 
 const Promise = require('promise');
-const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
 const facebookAnalyticsClient = require('../../clients/facebook/FacebookAnalyticsClient');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const withRunTime = require('../shared').withRunTime;
@@ -69,8 +68,8 @@ function sites(args, res) { // eslint-disable-line no-unused-vars
     const siteByIdQuery = 'SELECT * FROM fortis.sitesettings';
     cassandraConnector.executeQuery(siteByIdQuery, [])
     .then(rows => {
-      if (rows.length < 1) return reject(`Could not find site with sitename ${siteId}`);
-      if (rows.length > 1) return reject(`Got more than one site (got ${rows.length}) with sitename '${siteId}'`);
+      if (rows.length < 1) return reject(`Could not find site with sitename`);
+      if (rows.length > 1) return reject(`Got more than one site (got ${rows.length}) with sitename`);
 
       resolve({site: cassandraRowToSite(rows[0])});
     })
