@@ -93,7 +93,11 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     const conjunctivetopics = args.maintopics.length > 1 ? [] : args.conjunctivetopics;
     
     const MaxConjunctiveTopicsAllowed = 2;
+<<<<<<< HEAD
     const dateFormat = 'YYYY-MM-DD HH:mm';
+=======
+    const dateFormat = "YYYY-MM-DD HH:mm"
+>>>>>>> Refactored services to integrate reoptimized cassandra tables
 
     const query = `
     SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator
@@ -246,11 +250,15 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
           .slice(0, responseSize);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Refactored services to integrate reoptimized cassandra tables
         resolve({
           edges
         });
       })
       .catch(reject);
+<<<<<<< HEAD
 =======
       resolve({
         edges
@@ -258,6 +266,8 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
     })
     .catch(reject);
 >>>>>>> Reorganizing aggregation logic
+=======
+>>>>>>> Refactored services to integrate reoptimized cassandra tables
   });
 }
 
