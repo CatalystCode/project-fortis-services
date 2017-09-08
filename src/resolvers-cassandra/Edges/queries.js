@@ -96,7 +96,7 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     const dateFormat = 'YYYY-MM-DD HH:mm';
 
     const query = `
-    SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator, tileid
+    SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator
     FROM fortis.computedtiles
     WHERE periodtype = ?
     AND conjunctiontopic1 IN ?
@@ -132,8 +132,7 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
         }));
         resolve({
           labels,
-          graphData,
-          tiles
+          graphData
         });
       })
       .catch(reject);
