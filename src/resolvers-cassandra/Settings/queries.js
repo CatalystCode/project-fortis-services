@@ -68,11 +68,7 @@ function sites(args, res) { // eslint-disable-line no-unused-vars
     const siteByIdQuery = 'SELECT * FROM fortis.sitesettings';
     cassandraConnector.executeQuery(siteByIdQuery, [])
     .then(rows => {
-<<<<<<< HEAD
       if (rows.length < 1) return reject('Could not find site with sitename');
-=======
-      if (rows.length < 1) return reject(`Could not find site with sitename`);
->>>>>>> Fixing lint errors
       if (rows.length > 1) return reject(`Got more than one site (got ${rows.length}) with sitename`);
 
       resolve({site: cassandraRowToSite(rows[0])});
