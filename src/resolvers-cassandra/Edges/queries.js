@@ -5,7 +5,7 @@ const moment = require('moment');
 const Long = require('cassandra-driver').types.Long;
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { tilesForBbox, withRunTime, asCsvExporter, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
+const { tilesForBbox, withRunTime, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
 const { makeSet, makeMap, aggregateBy } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
@@ -93,15 +93,7 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     const conjunctivetopics = args.maintopics.length > 1 ? [] : args.conjunctivetopics;
 
     const MaxConjunctiveTopicsAllowed = 2;
-<<<<<<< HEAD
-<<<<<<< HEAD
     const dateFormat = 'YYYY-MM-DD HH:mm';
-=======
-    const dateFormat = "YYYY-MM-DD HH:mm"
->>>>>>> Refactored services to integrate reoptimized cassandra tables
-=======
-    const dateFormat = 'YYYY-MM-DD HH:mm';
->>>>>>> Fixing lint errors
 
     const query = `
     SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator, tileid
@@ -255,25 +247,11 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
         }))
           .slice(0, responseSize);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Refactored services to integrate reoptimized cassandra tables
         resolve({
           edges
         });
       })
       .catch(reject);
-<<<<<<< HEAD
-=======
-      resolve({
-        edges
-      });
-    })
-    .catch(reject);
->>>>>>> Reorganizing aggregation logic
-=======
->>>>>>> Refactored services to integrate reoptimized cassandra tables
   });
 }
 
