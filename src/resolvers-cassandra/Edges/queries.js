@@ -19,7 +19,6 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const fetchSize = 400;
     const responseSize = args.limit || 5;
-    const tiles = tilesForBbox(args.bbox, args.zoomLevel).map(tile=>tile.id);
 
     const query = `
     SELECT mentioncount, placeid, mentioncount, avgsentimentnumerator
@@ -43,7 +42,7 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
       args.pipelinekeys,
       args.externalsourceid,
       args.zoomLevel,
-      tiles,
+      tilesForBbox(args.bbox, args.zoomLevel).map(tile=>tile.id),
       MaxFetchedRows
     ];
 
@@ -94,18 +93,10 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     const conjunctivetopics = args.maintopics.length > 1 ? [] : args.conjunctivetopics;
     
     const MaxConjunctiveTopicsAllowed = 2;
-<<<<<<< HEAD
-<<<<<<< HEAD
     const dateFormat = 'YYYY-MM-DD HH:mm';
-=======
-    const dateFormat = "YYYY-MM-DD HH:mm"
->>>>>>> Refactored services to integrate reoptimized cassandra tables
-=======
-    const dateFormat = 'YYYY-MM-DD HH:mm';
->>>>>>> Fixing lint errors
 
     const query = `
-    SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator, tileid
+    SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator
     FROM fortis.computedtiles
     WHERE periodtype = ?
     AND conjunctiontopic1 IN ?
@@ -132,7 +123,6 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     return cassandraConnector.executeQuery(query, params)
       .then(rows => {
         const labels = Array.from(makeSet(rows, row => row.conjunctiontopic1)).map(row => ({ name: row }));
-        const tiles = Array.from(makeSet(rows, row => row.tileid)).map(row => row );
         const graphData = aggregateBy(rows, row => `${row.conjunctiontopic1}_${row.perioddate}`, row => ({
           date: moment(row.perioddate).format(dateFormat),
           name: row.conjunctiontopic1,
@@ -141,8 +131,7 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
         }));
         resolve({
           labels,
-          graphData,
-          tiles
+          graphData
         });
       })
       .catch(reject);
@@ -256,25 +245,11 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
         }))
           .slice(0, responseSize);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Refactored services to integrate reoptimized cassandra tables
         resolve({
           edges
         });
       })
       .catch(reject);
-<<<<<<< HEAD
-=======
-      resolve({
-        edges
-      });
-    })
-    .catch(reject);
->>>>>>> Reorganizing aggregation logic
-=======
->>>>>>> Refactored services to integrate reoptimized cassandra tables
   });
 }
 
