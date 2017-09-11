@@ -5,7 +5,7 @@ const moment = require('moment');
 const Long = require('cassandra-driver').types.Long;
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { tilesForBbox, withRunTime, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
+const { tilesForBbox, withRunTime, asCsvExporter, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
 const { makeSet, makeMap, aggregateBy } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
