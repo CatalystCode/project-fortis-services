@@ -40,6 +40,7 @@ module.exports = graphql.buildSchema(`
     defaultLanguage: String,
     storageConnectionString: String,
     featuresConnectionString: String,
+    featureServiceNamespace: String,
     mapzenApiKey: String,
     fbToken: String,
     supportedLanguages: [String]
