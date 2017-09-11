@@ -3,7 +3,7 @@
 const Promise = require('promise');
 const translatorService = require('../../clients/translator/MsftTranslator');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
-const { parseFromToDate, parseLimit, withRunTime, tilesForBbox, toPipelineKey, fromTopicListToConjunctionTopics, toConjunctionTopics, limitForInClause } = require('../shared');
+const { parseFromToDate, getsiteDefintion, parseLimit, withRunTime, tilesForBbox, toPipelineKey, fromTopicListToConjunctionTopics, toConjunctionTopics, limitForInClause } = require('../shared');
 const { makeSet } = require('../../utils/collections');
 const trackEvent = require('../../clients/appinsights/AppInsightsClient').trackEvent;
 
@@ -30,7 +30,8 @@ function eventToFeature(row) {
       externalsourceid: row.externalsourceid,
       language: row.eventlangcode,
       pipelinekey: row.pipelinekey,
-      link: row.sourceurl
+      link: row.sourceurl,
+      body: row.body
     }
   };
 }
@@ -55,12 +56,15 @@ function queryEventsTable(eventIdResponse, args) {
 
     if(eventIdResponse.rows.length){
       cassandraConnector.executeQuery(eventsQuery, eventsParams)
-      .then(rows => resolve({
+      .then(rows => {
+        let test = 1;
+        resolve({
         type: 'FeatureCollection',
         features: rows.map(eventToFeature),
         pageState: eventIdResponse.pageState,
         bbox: args.bbox
-      }))
+      })
+      })
       .catch(reject);
     }else{
       resolve({type: 'FeatureCollection', features: []});
@@ -188,7 +192,13 @@ function event(args, res) { // eslint-disable-line no-unused-vars
  */
 function translate(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    translatorService.translate(args.sentence, args.fromLanguage, args.toLanguage)
+    getsiteDefintion()
+    .then(sitesettings => {
+      return translatorService.translate(sitesettings.site.properties.translationsvctoken, 
+                                args.sentence, 
+                                args.fromLanguage, 
+                                args.toLanguage)
+      })
     .then(result => {
       const translatedSentence = result.translatedSentence;
       const originalSentence = args.sentence;
