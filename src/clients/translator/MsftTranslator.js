@@ -46,10 +46,10 @@ function getAccessTokenForTranslation(token) {
 function TranslateSentenceArrayWithToken(access_token, wordsToTranslate, fromLanguage, toLanguage) {
   const headers = {
     'Authorization': 'Bearer ' + access_token,
-    'Content-Type':'text/xml; charset=utf-8'
+    'Content-Type': 'text/xml; charset=utf-8'
   };
 
-  const text = `<Texts>${wordsToTranslate.map(text=>`<string xmlns='http://schemas.microsoft.com/2003/10/Serialization/Arrays'>${text}</string>`).join('')}</Texts>`;
+  const text = `<Texts>${wordsToTranslate.map(text => `<string xmlns='http://schemas.microsoft.com/2003/10/Serialization/Arrays'>${text}</string>`).join('')}</Texts>`;
   const requestXML = `<TranslateArrayRequest><AppId/><From>${fromLanguage}</From>${text}<To>${toLanguage}</To></TranslateArrayRequest>`;
 
   const POST = {
@@ -65,7 +65,7 @@ function TranslateSentenceArrayWithToken(access_token, wordsToTranslate, fromLan
         xml2js.parseString(body, (err, result) => {
           if (!err & !!result && result.ArrayOfTranslateArrayResponse && result.ArrayOfTranslateArrayResponse.TranslateArrayResponse) {
             const translatedPhrases = result.ArrayOfTranslateArrayResponse.TranslateArrayResponse;
-            resolve(wordsToTranslate.map((phrase, index)=>Object.assign({}, {originalSentence: phrase, translatedSentence: translatedPhrases[index].TranslatedText})));
+            resolve(wordsToTranslate.map((phrase, index) => Object.assign({}, { originalSentence: phrase, translatedSentence: translatedPhrases[index].TranslatedText })));
           } else {
             return reject(err || 'Failed to pull data from: ' + JSON.stringify(response));
           }
@@ -103,11 +103,11 @@ function TranslateWithToken(access_token, sentence, fromLanguage, toLanguage) {
 
 function translateSentenceArray(wordsToTranslate, fromLanguage, toLanguage) {
   return new Promise((resolve, reject) => {
-      getAccessTokenForTranslation()
+    getAccessTokenForTranslation()
       .then(authBody => {
         TranslateSentenceArrayWithToken(authBody.token, wordsToTranslate, fromLanguage, toLanguage)
-        .then(result => resolve({ translatedSentence: result }))
-        .catch(reject);
+          .then(result => resolve({ translatedSentence: result }))
+          .catch(reject);
       })
       .catch(reject);
   });
@@ -115,11 +115,11 @@ function translateSentenceArray(wordsToTranslate, fromLanguage, toLanguage) {
 
 function translate(token, sentence, fromLanguage, toLanguage) {
   return new Promise((resolve, reject) => {
-      getAccessTokenForTranslation(token)
+    getAccessTokenForTranslation(token)
       .then(authBody => {
         TranslateWithToken(authBody.token, sentence, fromLanguage, toLanguage)
-        .then(result => resolve({ translatedSentence: result }))
-        .catch(reject);
+          .then(result => resolve({ translatedSentence: result }))
+          .catch(reject);
       })
       .catch(reject);
   });

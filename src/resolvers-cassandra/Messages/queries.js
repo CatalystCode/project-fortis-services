@@ -16,12 +16,12 @@ function eventToFeature(row) {
 
   return {
     type: FeatureType,
-    coordinates: row.computedfeatures.places.map(place=>[place.centroidlon, place.centroidlat]),
+    coordinates: row.computedfeatures.places.map(place => [place.centroidlon, place.centroidlat]),
     properties: {
       edges: row.topics,
       messageid: row.eventid,
       sourceeventid: row.sourceeventid,
-      entities: row.computedfeatures && row.computedfeatures.entities ? row.computedfeatures.entities.map(entity=>entity.name) : [],
+      entities: row.computedfeatures && row.computedfeatures.entities ? row.computedfeatures.entities.map(entity => entity.name) : [],
       eventtime: row.eventtime,
       sentiment: row.computedfeatures && row.computedfeatures.sentiment ? row.computedfeatures.sentiment.neg_avg : -1,
       title: row.title,
@@ -54,20 +54,20 @@ function queryEventsTable(eventIdResponse, args) {
       eventsParams.push(`%${args.fulltextTerm}%`);
     }
 
-    if(eventIdResponse.rows.length){
+    if (eventIdResponse.rows.length) {
       cassandraConnector.executeQuery(eventsQuery, eventsParams)
-      .then(rows => {
-        let test = 1;
-        resolve({
-        type: 'FeatureCollection',
-        features: rows.map(eventToFeature),
-        pageState: eventIdResponse.pageState,
-        bbox: args.bbox
-      })
-      })
-      .catch(reject);
-    }else{
-      resolve({type: 'FeatureCollection', features: []});
+        .then(rows => {
+          let test = 1;
+          resolve({
+            type: 'FeatureCollection',
+            features: rows.map(eventToFeature),
+            pageState: eventIdResponse.pageState,
+            bbox: args.bbox
+          });
+        })
+        .catch(reject);
+    } else {
+      resolve({ type: 'FeatureCollection', features: [] });
     }
   });
 }
@@ -80,11 +80,11 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     if (!args.bbox || args.bbox.length !== 4) return reject('Invalid bbox specified');
     if (!args.conjunctivetopics.length) return reject('Empty conjunctive topic list specified');
-    
+
     let tableName = 'eventplaces';
     let tagsParams = [
       ...fromTopicListToConjunctionTopics(args.conjunctivetopics),
-      tilesForBbox(args.bbox, args.zoomLevel).map(tile=>tile.id),
+      tilesForBbox(args.bbox, args.zoomLevel).map(tile => tile.id),
       args.zoomLevel,
       args.pipelinekeys
     ];
@@ -109,9 +109,9 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
     `.trim();
 
     cassandraConnector.executeQueryWithPageState(tagsQuery, tagsParams, args.pageState, parseLimit(args.limit))
-    .then(response => queryEventsTable(response, args))
-    .then(resolve)
-    .catch(reject);
+      .then(response => queryEventsTable(response, args))
+      .then(resolve)
+      .catch(reject);
   });
 }
 
@@ -146,11 +146,11 @@ function byEdges(args, res) { // eslint-disable-line no-unused-vars
     ];
 
     cassandraConnector.executeQuery(tagsQuery, tagsParams)
-    .then(rows => {
-      return queryEventsTable(rows, args);
-    })
-    .then(resolve)
-    .catch(reject);
+      .then(rows => {
+        return queryEventsTable(rows, args);
+      })
+      .then(resolve)
+      .catch(reject);
   });
 }
 
@@ -174,15 +174,15 @@ function event(args, res) { // eslint-disable-line no-unused-vars
     ];
 
     cassandraConnector.executeQuery(eventQuery, eventParams)
-    .then(rows => {
-      if (!rows.length) return reject(`No event matching id ${args.messageId} found`);
-      if (rows.length > 1) return reject(`Got more than one event with id ${args.messageId}`);
+      .then(rows => {
+        if (!rows.length) return reject(`No event matching id ${args.messageId} found`);
+        if (rows.length > 1) return reject(`Got more than one event with id ${args.messageId}`);
 
-      const feature = eventToFeature(rows[0]);
+        const feature = eventToFeature(rows[0]);
 
-      resolve(feature);
-    })
-    .catch(reject);
+        resolve(feature);
+      })
+      .catch(reject);
   });
 }
 
@@ -193,22 +193,22 @@ function event(args, res) { // eslint-disable-line no-unused-vars
 function translate(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     getsiteDefintion()
-    .then(sitesettings => {
-      return translatorService.translate(sitesettings.site.properties.translationsvctoken, 
-                                args.sentence, 
-                                args.fromLanguage, 
-                                args.toLanguage)
+      .then(sitesettings => {
+        return translatorService.translate(sitesettings.site.properties.translationsvctoken,
+          args.sentence,
+          args.fromLanguage,
+          args.toLanguage);
       })
-    .then(result => {
-      const translatedSentence = result.translatedSentence;
-      const originalSentence = args.sentence;
+      .then(result => {
+        const translatedSentence = result.translatedSentence;
+        const originalSentence = args.sentence;
 
-      resolve({
-        translatedSentence,
-        originalSentence
-      });
-    })
-    .catch(reject);
+        resolve({
+          translatedSentence,
+          originalSentence
+        });
+      })
+      .catch(reject);
   });
 }
 
@@ -219,14 +219,14 @@ function translate(args, res) { // eslint-disable-line no-unused-vars
 function translateWords(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     translatorService.translateSentenceArray(args.words, args.fromLanguage, args.toLanguage)
-    .then(result => {
-      const words = result.translatedSentence;
+      .then(result => {
+        const words = result.translatedSentence;
 
-      resolve({
-        words
-      });
-    })
-    .catch(reject);
+        resolve({
+          words
+        });
+      })
+      .catch(reject);
   });
 }
 
