@@ -57,7 +57,6 @@ function queryEventsTable(eventIdResponse, args) {
     if (eventIdResponse.rows.length) {
       cassandraConnector.executeQuery(eventsQuery, eventsParams)
         .then(rows => {
-          let test = 1;
           resolve({
             type: 'FeatureCollection',
             features: rows.map(eventToFeature),

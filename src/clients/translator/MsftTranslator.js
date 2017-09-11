@@ -1,7 +1,6 @@
 'use strict';
 
 const xml2js = require('xml2js');
-const nconf = require('nconf');
 const Promise = require('promise');
 const request = require('request');
 const trackDependency = require('../appinsights/AppInsightsClient').trackDependency;
