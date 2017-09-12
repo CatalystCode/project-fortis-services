@@ -93,14 +93,10 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     const conjunctivetopics = args.maintopics.length > 1 ? [] : args.conjunctivetopics;
 
     const MaxConjunctiveTopicsAllowed = 2;
-<<<<<<< HEAD
     const dateFormat = 'YYYY-MM-DD HH:mm';
-=======
-    const dateFormat = "YYYY-MM-DD HH:mm"
->>>>>>> Refactored services to integrate reoptimized cassandra tables
 
     const query = `
-    SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator
+    SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator, tileid
     FROM fortis.computedtiles
     WHERE periodtype = ?
     AND conjunctiontopic1 IN ?
@@ -136,7 +132,8 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
         }));
         resolve({
           labels,
-          graphData
+          graphData,
+          tiles
         });
       })
       .catch(reject);
@@ -250,25 +247,11 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
         }))
           .slice(0, responseSize);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Refactored services to integrate reoptimized cassandra tables
         resolve({
           edges
         });
       })
       .catch(reject);
-<<<<<<< HEAD
-=======
-      resolve({
-        edges
-      });
-    })
-    .catch(reject);
->>>>>>> Reorganizing aggregation logic
-=======
->>>>>>> Refactored services to integrate reoptimized cassandra tables
   });
 }
 
