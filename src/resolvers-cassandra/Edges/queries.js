@@ -9,7 +9,7 @@ const { tilesForBbox, withRunTime, withCsvExporter, toConjunctionTopics, fromTop
 const { makeSet, makeMap, aggregateBy } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
-const MaxFetchedRows = 10000;
+const MaxFetchedRows = 1000;
 
 /**
  * @param {{limit: Int!, fromDate: String!, periodType: String!, toDate: String!, externalsourceid: String!, pipelinekeys: [String]!, bbox: [Float]}} args
@@ -265,6 +265,8 @@ function topSources(args, res) { // eslint-disable-line no-unused-vars
 function conjunctiveTopics(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const fetchSize = 400;
+    const CassandraLimit = 1000;
+    const MaxSize = 50;
 
     const query = `
     SELECT mentioncount, conjunctivetopic, topic
@@ -287,7 +289,7 @@ function conjunctiveTopics(args, res) { // eslint-disable-line no-unused-vars
       args.pipelinekeys,
       args.externalsourceid,
       tilesForBbox(args.bbox, args.zoomLevel).map(tile => tile.id),
-      MaxFetchedRows
+      CassandraLimit
     ];
 
     return cassandraConnector.executeQuery(query, params, { fetchSize })
@@ -298,7 +300,7 @@ function conjunctiveTopics(args, res) { // eslint-disable-line no-unused-vars
           conjunctionterm: row.conjunctivetopic,
           name: row.topic,
           mentions: Long.ZERO
-        }));
+        })).slice(0, MaxSize);
 
         resolve({
           edges
