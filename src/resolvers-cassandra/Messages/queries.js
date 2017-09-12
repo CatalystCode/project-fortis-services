@@ -61,7 +61,7 @@ function queryEventsTable(eventIdResponse, args) {
             type: 'FeatureCollection',
             features: rows.map(eventToFeature),
             bbox: args.bbox,
-            pageState: eventIdResponse.pageState,
+            pageState: eventIdResponse.pageState
           });
         })
         .catch(reject);
