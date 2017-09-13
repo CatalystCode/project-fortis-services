@@ -19,6 +19,7 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const fetchSize = 400;
     const responseSize = args.limit || 5;
+    const layerfilters = ['country'];
 
     const query = `
     SELECT mentioncount, placeid, mentioncount, avgsentimentnumerator
@@ -61,10 +62,11 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
                 placeid: row.placeid,
                 avgsentimentnumerator: row.avgsentimentnumerator,
                 bbox: placeIdToFeature[row.placeid].bbox
-              }));
+              }))
+              .filter(row=>row.layer && layerfilters.indexOf(row.layer) === -1);
 
               resolve({
-                edges: aggregateBy(edges, row => `${row.placeid}`, row => ({
+                edges: aggregateBy(edges, row => `${row.name.toLowerCase()}`, row => ({
                   name: row.name,
                   coordinates: row.coordinates,
                   bbox: row.bbox,

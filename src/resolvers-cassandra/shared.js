@@ -170,7 +170,6 @@ function withCsvExporter(promiseFunc, exportPropertyName, container, expiryMinut
 
 module.exports = {
   parseLimit,
-  parseFromToDate,
   toPipelineKey,
   toConjunctionTopics,
   tilesForBbox,
