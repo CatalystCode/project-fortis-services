@@ -69,7 +69,6 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
                   centroid: row.centroid,
                   bbox: row.bbox,
                   placeid: row.placeid,
-                  centroid: row.centroid,
                   mentions: Long.ZERO,
                   layer: row.layer,
                   avgsentimentnumerator: Long.ZERO
