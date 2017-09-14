@@ -36,6 +36,7 @@ module.exports = graphql.buildSchema(`
     name: String
     placeid: String
     bbox: [Float]
+    centroid: [Float]
   }
 
   type ExternalSource {

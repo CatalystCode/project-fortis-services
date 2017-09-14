@@ -4,6 +4,7 @@ const Promise = require('promise');
 const uuid = require('uuid/v4');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const blobStorageClient = require('../../clients/storage/BlobStorageClient');
+const serviceBusClient = require('../../clients/servicebus/ServiceBusClient');
 const { withRunTime, limitForInClause } = require('../shared');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 const apiUrlBase = process.env.FORTIS_CENTRAL_ASSETS_HOST || 'https://fortiscentral.blob.core.windows.net';
@@ -13,6 +14,9 @@ const STREAM_CONNECTOR_TWITTER = 'Twitter';
 const TRUSTED_SOURCES_CONNECTOR_TWITTER = 'Twitter';
 const TRUSTED_SOURCES_CONNECTOR_FACEBOOK = 'FacebookPage';
 const TRUSTED_SOURCES_RANK_DEFAULT = 10;
+
+const SERVICE_BUS_CONFIG_QUEUE = process.env.FORTIS_SB_CONFIG_QUEUE || 'configuration';
+const SERVICE_BUS_COMMAND_QUEUE = process.env.FORTIS_SB_COMMAND_QUEUE || 'command';
 
 function createOrReplaceSite(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => { // eslint-disable-line no-unused-vars
@@ -52,10 +56,6 @@ function _insertTopics(siteType) {
 
 const insertTopics = trackEvent(_insertTopics, 'Settings.Topics.Insert', (response, err) => ({numTopicsInserted: err ? 0 : response.numTopicsInserted}));
 
-/**
- * @param {{input: {targetBbox: number[], defaultZoomLevel: number, logo: string, title: string, defaultLocation: number[], supportedLanguages: string[]}}} args
- * @returns {Promise}
- */
 function editSite(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const siteName = args && args.input && args.input.name;
@@ -86,6 +86,9 @@ function editSite(args, res) { // eslint-disable-line no-unused-vars
         ]
       }]);
     })
+    .then(() => {
+      serviceBusClient.sendStringMessage(SERVICE_BUS_CONFIG_QUEUE, JSON.stringify({'dirty': 'settings'}));
+    })
     .then(() => { 
       resolve({
         name: args.input.name,
@@ -103,10 +106,6 @@ function editSite(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
-/**
- * @param {{input: {siteType: string, targetBbox: number[], defaultZoomLevel: number, logo: string, title: string, name: string, defaultLocation: number[], storageConnectionString: string, featuresConnectionString: string, mapzenApiKey: string, fbToken: string, supportedLanguages: string[]}}} args
- * @returns {Promise}
- */
 function createSite(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const siteType = args && args.input && args.input.siteType;
@@ -139,6 +138,9 @@ function createSite(args, res) { // eslint-disable-line no-unused-vars
         ]
       }]);
     })
+    .then(() => {
+      serviceBusClient.sendStringMessage(SERVICE_BUS_CONFIG_QUEUE, JSON.stringify({'dirty': 'settings'}));
+    })
     .then(() => { 
       resolve({
         name: args.input.name,
@@ -156,10 +158,6 @@ function createSite(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
-/**
- * @param {{input: {site: string, edges: Array<{name: string}>}}} args
- * @returns {Promise.<{runTime: string, edges: Array<{name: string}>}>}
- */
 function removeKeywords(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     if (!args || !args.edges || !args.edges.length) return reject('No keywords to remove specified');
@@ -179,10 +177,6 @@ function removeKeywords(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
-/**
- * @param {{input: {site: string, edges: Array<{name: string}>}}} args
- * @returns {Promise.<{runTime: string, edges: Array<{name: string}>}>}
- */
 function addKeywords(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     if (!args || !args.edges || !args.edges.length) return reject('No keywords to add specified');
@@ -202,10 +196,6 @@ function addKeywords(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
-/**
- * @param {{input: {siteType: string, targetBbox: number[], defaultZoomLevel: number, logo: string, title: string, name: string, defaultLocation: number[], storageConnectionString: string, featuresConnectionString: string, mapzenApiKey: string, fbToken: string, supportedLanguages: string[]}}} args
- * @returns {Promise}
- */
 function removeSite(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     cassandraConnector.executeBatchMutations([{
@@ -233,10 +223,6 @@ function paramEntryToMap(paramEntry) {
   return paramEntry.reduce((obj, item) => (obj[item.key] = item.value, obj), {});
 }
 
-/**
- * @param {{input: {pipelineKey: string, pipelineLabel: string, pipelineIcon: string, streamFactory: string, params: Array<{String: String}>, enabled: boolean}}} args
- * @returns {Promise}
- */
 function modifyStreams(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const streams = args && args.input && args.input.streams;
@@ -250,14 +236,15 @@ function modifyStreams(args, res) { // eslint-disable-line no-unused-vars
         SET pipelinelabel = ?,
         pipelineicon = ?,
         streamfactory = ?,
-        params = ?
+        params = ?,
+        enabled = ?
         WHERE streamid = ? AND pipelinekey = ?`,
         params: [
           stream.pipelineLabel,
           stream.pipelineIcon,
           stream.streamFactory,
           params,
-          //stream.enabled,
+          stream.enabled,
           stream.streamId,
           stream.pipelineKey
         ]
@@ -265,6 +252,9 @@ function modifyStreams(args, res) { // eslint-disable-line no-unused-vars
     });
 
     cassandraConnector.executeBatchMutations(mutations)
+    .then(() => {
+      serviceBusClient.sendStringMessage(SERVICE_BUS_COMMAND_QUEUE, JSON.stringify({'dirty': 'streams'}));
+    })
     .then(() => {
       resolve({
         streams
@@ -274,11 +264,6 @@ function modifyStreams(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
-
-/**
- * @param {{input: {pipelineKey: string, pipelineLabel: string, pipelineIcon: string, streamFactory: string, params: Array<{String: String}>, enabled: boolean}}} args
- * @returns {Promise}
- */
 function removeStreams(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const streams = args && args.input && args.input.streams;
@@ -293,6 +278,9 @@ function removeStreams(args, res) { // eslint-disable-line no-unused-vars
     });
 
     cassandraConnector.executeBatchMutations(deletions)
+    .then(() => {
+      serviceBusClient.sendStringMessage(SERVICE_BUS_COMMAND_QUEUE, JSON.stringify({'dirty': 'streams'}));
+    })
     .then(() => {
       resolve({
         streams
@@ -319,10 +307,6 @@ function normalizedFacebookPage(primaryKeyValues) {
   };
 }
 
-/**
- * @param {{input: {site: string, pages: Array<{pageUrl: string, RowKey: string}>}}} args
- * @returns {Promise.<{runTime: string, pages: Array<{pageUrl: string, RowKey: string}>}>}
- */
 function modifyFacebookPages(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const pages = args && args.input && args.input.pages;
@@ -357,10 +341,6 @@ function modifyFacebookPages(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
-/**
- * @param {{input: {site: string, pages: Array<{pageUrl: string, RowKey: string}>}}} args
- * @returns {Promise.<{runTime: string, pages: Array<{pageUrl: string, RowKey: string}>}>}
- */
 function removeFacebookPages(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const pages = args && args.input && args.input.pages;
@@ -398,10 +378,6 @@ function normalizedTrustedTwitterAccount(account) {
   };
 }
 
-/**
- * @param {{input: {site: string, accounts: Array<{acctUrl: string, RowKey: string}>}}} args
- * @returns {Promise.<{runTime: string, accounts: Array<{pageUrl: string, RowKey: string}>}>}
- */
 function modifyTrustedTwitterAccounts(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const accounts = args && args.input && args.input.accounts;
@@ -421,10 +397,6 @@ function modifyTrustedTwitterAccounts(args, res) { // eslint-disable-line no-unu
   });
 }
 
-/**
- * @param {{input: {site: string, accounts: Array<{acctUrl: string, RowKey: string}>}}} args
- * @returns {Promise.<{runTime: string, accounts: Array<{pageUrl: string, RowKey: string}>}>}
- */
 function removeTrustedTwitterAccounts(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const accounts = args && args.input && args.input.accounts;
@@ -439,10 +411,6 @@ function removeTrustedTwitterAccounts(args, res) { // eslint-disable-line no-unu
   });
 }
 
-/**
- * @param {{input: {site: string, accounts: Array<{accountName: string, consumerKey: string, consumerSecret: string, token: string, tokenSecret: string}>}}} args
- * @returns {Promise.<{runTime: string, accounts: Array<{accountName: string, consumerKey: string, consumerSecret: string, token: string, tokenSecret: string}>}>}
- */
 function modifyTwitterAccounts(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const accounts = args && args.input && args.input.accounts;
@@ -470,10 +438,6 @@ function modifyTwitterAccounts(args, res) { // eslint-disable-line no-unused-var
   });
 }
 
-/**
- * @param {{input: {site: string, accounts: Array<{accountName: string, consumerKey: string, consumerSecret: string, token: string, tokenSecret: string}>}}} args
- * @returns {Promise.<{runTime: string, accounts: Array<{accountName: string, consumerKey: string, consumerSecret: string, token: string, tokenSecret: string}>}>}
- */
 function removeTwitterAccounts(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const accounts = args && args.input && args.input.accounts;
@@ -491,10 +455,6 @@ function removeTwitterAccounts(args, res) { // eslint-disable-line no-unused-var
   });
 }
 
-/**
- * @param {{input: {site: string, terms: Array<{RowKey: string, lang: string, filteredTerms: string[]}>}}} args
- * @returns {Promise.<{runTime: string, filters: Array<{filteredTerms: string[], lang: string, RowKey: string}>}>}
- */
 function modifyBlacklist(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const terms = args && args.input && args.input.terms;
@@ -524,10 +484,6 @@ function modifyBlacklist(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
-/**
- * @param {{input: {site: string, terms: Array<{RowKey: string, lang: string, filteredTerms: string[]}>}}} args
- * @returns {Promise.<{runTime: string, filters: Array<{filteredTerms: string[], lang: string, RowKey: string}>}>}
- */
 function removeBlacklist(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const terms = args && args.input && args.input.terms;
