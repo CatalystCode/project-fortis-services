@@ -52,7 +52,7 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
         const placeIds = Array.from(makeSet(rows, row => row.placeid));
 
         if (placeIds.length) {
-          featureServiceClient.fetchById(placeIds, 'bbox')
+          featureServiceClient.fetchById(placeIds, 'bbox,centroid')
             .then(features => {
               const placeIdToFeature = makeMap(features, feature => feature.id, feature => feature);
               const edges = rows.map(row => ({
@@ -61,7 +61,8 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
                 layer: placeIdToFeature[row.placeid].layer,
                 placeid: row.placeid,
                 avgsentimentnumerator: row.avgsentimentnumerator,
-                bbox: placeIdToFeature[row.placeid].bbox
+                bbox: placeIdToFeature[row.placeid].bbox,
+                centroid: placeIdToFeature[row.placeid].centroid
               }))
               .filter(row=>row.layer && layerfilters.indexOf(row.layer) === -1);
 
@@ -71,6 +72,7 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
                   coordinates: row.coordinates,
                   bbox: row.bbox,
                   placeid: row.placeid,
+                  centroid: row.centroid,
                   mentions: Long.ZERO,
                   layer: row.layer,
                   avgsentimentnumerator: Long.ZERO

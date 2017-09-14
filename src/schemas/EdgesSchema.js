@@ -28,6 +28,7 @@ module.exports = graphql.buildSchema(`
     mentions: Int
     avgsentiment: Float
     bbox: [Float]
+    centroid: [Float]
   }
 
   type OsmPlace{
