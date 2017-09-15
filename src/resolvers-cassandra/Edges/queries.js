@@ -86,7 +86,14 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
 
 function timeSeries(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    const conjunctivetopics = args.maintopics.length > 1 ? [] : args.conjunctivetopics;
+    let conjunctivetopics = args.conjunctivetopics;
+    let maintopics = args.maintopics;
+
+    if(conjunctivetopics.length && maintopics.length){
+       const topics = toConjunctionTopics(args.maintopics[0], args.conjunctivetopics);
+       maintopics = [topics[0]];
+       conjunctivetopics = topics.slice(1);
+    }
 
     const MaxConjunctiveTopicsAllowed = 2;
     const dateFormat = 'YYYY-MM-DD HH:mm';
@@ -108,7 +115,7 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
 
     const params = [
       args.periodType,
-      args.maintopics,
+      maintopics,
       ...fromTopicListToConjunctionTopics(conjunctivetopics, MaxConjunctiveTopicsAllowed),
       args.pipelinekeys,
       args.externalsourceid,

@@ -53,10 +53,16 @@ function queryHeatmapTilesByParentTile(args) {
     ];
 
     cassandraConnector.executeQuery(query, params)
-    .then(rows => resolve({
+    .then(rows => {
+
+      if(rows.length){
+        let test = 1;
+      }
+      resolve({
       type: type,
       features: [].concat.apply([], heatmapToFeatures(rows))
-    }))
+    })
+    })
     .catch(reject);
   });
 }
