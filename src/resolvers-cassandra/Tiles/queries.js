@@ -34,7 +34,7 @@ function filterFeaturesByPlaceBbox(bbox, zoomLevel, features) {
     const placetiles = tilesForBbox(bbox, zoomLevel).map(tile => tile.id);
 
     filteredfeatures = features.filter(feature => {
-      const tileid = feature.properties && feature.properties.tile && feature.properties.tile.id ? feature.properties.tile.id : "";
+      const tileid = feature.properties && feature.properties.tile && feature.properties.tile.id ? feature.properties.tile.id : '';
 
       return tileid && placetiles.indexOf(tileid) > -1;
     });
@@ -77,7 +77,7 @@ function queryHeatmapTilesByParentTile(args) {
         resolve({
           type: type,
           features: [].concat.apply([], filterFeaturesByPlaceBbox(args.bbox, args.zoomLevel + DETAIL_ZOOM_LEVEL, heatmapfeatures))
-        })
+        });
       })
       .catch(reject);
   });
