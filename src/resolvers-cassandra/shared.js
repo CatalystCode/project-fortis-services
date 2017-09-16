@@ -18,25 +18,16 @@ function cassandraRowToSite(row) {
       defaultZoomLevel: row.defaultzoom,
       logo: row.logo,
       title: row.title,
-      translationsvctoken: row.translationsvctoken,
-      featureServiceNamespace: row.featureservicenamespace,
-      defaultLocation: row.geofence,
+      translationSvcToken: row.translationsvctoken,
       featureservicenamespace: row.featureservicenamespace,
+      defaultLocation: row.geofence,
       defaultLanguage: row.defaultlanguage,
-      supportedLanguages: row.languages
+      supportedLanguages: row.languages,
+      cogSpeechSvcToken: row.cogspeechsvctoken,
+      cogVisionSvcToken: row.cogvisionsvctoken,
+      cogTextSvcToken: row.cogtextsvctoken
     }
   };
-}
-
-function tilesInsideFeaturePlace(tileids, placeid, bbox, zoom){
-  if(placeid){
-    const featuretiles = tilesForBbox(bbox, zoom).map(tile=>tile.id);
-    const filteredtiles = featuretiles.filter(tileid=>tileids.indexOf(tileid) > -1);
-
-    return filteredtiles;
-  }
-
-  return tileids;
 }
 
 function getSiteDefintion() {
@@ -191,7 +182,6 @@ module.exports = {
   tilesForLocations,
   limitForInClause,
   getSiteDefintion,
-  tilesInsideFeaturePlace,
   fromTopicListToConjunctionTopics,
   withCsvExporter,
   withRunTime
