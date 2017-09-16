@@ -28,6 +28,17 @@ function cassandraRowToSite(row) {
   };
 }
 
+function tilesInsideFeaturePlace(tileids, placeid, bbox, zoom){
+  if(placeid){
+    const featuretiles = tilesForBbox(bbox, zoom).map(tile=>tile.id);
+    const filteredtiles = featuretiles.filter(tileid=>tileids.indexOf(tileid) > -1);
+
+    return filteredtiles;
+  }
+
+  return tileids;
+}
+
 function getSiteDefintion() {
   return new Promise((resolve, reject) => {
     const siteByIdQuery = 'SELECT * FROM fortis.sitesettings';
@@ -180,6 +191,7 @@ module.exports = {
   tilesForLocations,
   limitForInClause,
   getSiteDefintion,
+  tilesInsideFeaturePlace,
   fromTopicListToConjunctionTopics,
   withCsvExporter,
   withRunTime
