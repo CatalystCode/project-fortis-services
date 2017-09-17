@@ -4,7 +4,7 @@ module.exports = graphql.buildSchema(`
   type Query {
     sites: SiteCollection
     streams: StreamCollection
-    trustedsources(pipelinekeys: [String]!, sourcename: String): SourceCollection
+    trustedSources(pipelinekeys: [String]!, sourcename: String): SourceCollection
     siteTerms(translationLanguage: String): TermCollection
     twitterAccounts: TwitterAccountCollection
     trustedTwitterAccounts(siteId: String!): TrustedTwitterAccountCollection

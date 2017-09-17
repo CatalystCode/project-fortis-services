@@ -22,7 +22,7 @@ module.exports = {
 
   siteTerms: queries.siteTerms,
   sites: queries.sites,
-  trustedsources: queries.trustedsources,
+  trustedSources: queries.trustedSources,
   streams: queries.streams,
   twitterAccounts: queries.twitterAccounts,
   trustedTwitterAccounts: queries.trustedTwitterAccounts,

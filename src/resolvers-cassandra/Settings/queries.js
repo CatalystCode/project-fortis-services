@@ -62,7 +62,7 @@ function streams(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
-function trustedsources(args, res) { // eslint-disable-line no-unused-vars
+function trustedSources(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const query = 'SELECT * FROM fortis.trustedsources where pipelinekey IN ?';
     const params = [
@@ -224,7 +224,7 @@ module.exports = {
   sites: trackEvent(withRunTime(sites), 'sites'),
   streams: trackEvent(withRunTime(streams), 'streams'),
   siteTerms: trackEvent(withRunTime(terms), 'terms'),
-  trustedsources: trackEvent(withRunTime(trustedsources), 'trustedsources'),
+  trustedSources: trackEvent(withRunTime(trustedSources), 'trustedsources'),
   twitterAccounts: trackEvent(withRunTime(twitterAccounts), 'twitterAccounts'),
   trustedTwitterAccounts: trackEvent(withRunTime(trustedTwitterAccounts), 'trustedTwitterAccounts'),
   facebookPages: trackEvent(withRunTime(facebookPages), 'facebookPages'),
