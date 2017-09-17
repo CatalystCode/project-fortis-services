@@ -5,6 +5,9 @@ const uuid = require('uuid/v4');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const blobStorageClient = require('../../clients/storage/BlobStorageClient');
 const serviceBusClient = require('../../clients/servicebus/ServiceBusClient');
+const appInsightsProps = require('./AppInsightsProps');
+const appInsightsMetrics = require('./AppInsightsMetrics');
+const appInsightsConstants = require('../AppInsightsConstants');
 const { withRunTime, limitForInClause } = require('../shared');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 const apiUrlBase = process.env.FORTIS_CENTRAL_ASSETS_HOST || 'https://fortiscentral.blob.core.windows.net';
@@ -599,7 +602,9 @@ module.exports = {
   modifyTwitterAccounts: trackEvent(withRunTime(modifyTwitterAccounts), 'modifyTwitterAccounts'),
   removeTwitterAccounts: trackEvent(withRunTime(removeTwitterAccounts), 'removeTwitterAccounts'),
   modifyTrustedSources: trackEvent(withRunTime(modifyTrustedSources), 'modifyTrustedSources'), 
-  removeTrustedSources: trackEvent(withRunTime(removeTrustedSources), 'removeTrustedSources'), 
+  removeTrustedSources: trackEvent(withRunTime(removeTrustedSources), 'removeTrustedSources', 
+  appInsightsProps.extraProps(appInsightsConstants.OPERATIONS.remove, appInsightsConstants.TABLES.trustedsources, appInsightsConstants.COLLECTIONS.sources), 
+  appInsightsMetrics.extraMetrics(appInsightsConstants.COLLECTIONS.sources)), 
   modifyBlacklist: trackEvent(withRunTime(modifyBlacklist), 'modifyBlacklist'),
   removeBlacklist: trackEvent(withRunTime(removeBlacklist), 'removeBlacklist')
 };
