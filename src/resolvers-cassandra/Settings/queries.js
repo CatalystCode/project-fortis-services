@@ -220,6 +220,32 @@ function termBlacklist(args, res) { // eslint-disable-line no-unused-vars
   });
 }
 
+function getTrustedSourcesRowKey(pipelineKey, externalSourceId, sourceType, rank) {
+  return pipelineKey + ',' + externalSourceId + ',' + sourceType +  ',' + rank;
+}
+
+function cassandraRowToTrustedSource(row) {
+  return {
+    rowKey: getTrustedSourcesRowKey(row.pipelinekey, row.externalsourceid, row.sourcetype, row.rank),
+    pipelineKey: row.pipelinekey,
+    externalSourceId: row.externalsourceid,
+    sourceType: row.sourcetype,
+    rank: row.rank
+  };
+}
+
+function trustedSources(args, res) { // eslint-disable-line no-unused-vars
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT pipelinekey, externalsourceid, sourcetype, rank FROM fortis.trustedsources;';
+    cassandraConnector.executeQuery(query, [])
+    .then(rows => {
+      const sources = rows.map(cassandraRowToTrustedSource);
+      resolve({ sources });
+    })
+    .catch(reject);
+  });
+}
+
 module.exports = {
   sites: trackEvent(withRunTime(sites), 'sites'),
   streams: trackEvent(withRunTime(streams), 'streams'),
@@ -229,5 +255,6 @@ module.exports = {
   trustedTwitterAccounts: trackEvent(withRunTime(trustedTwitterAccounts), 'trustedTwitterAccounts'),
   facebookPages: trackEvent(withRunTime(facebookPages), 'facebookPages'),
   facebookAnalytics: trackEvent(facebookAnalytics, 'facebookAnalytics'),
-  termBlacklist: trackEvent(withRunTime(termBlacklist), 'termBlacklist')
+  termBlacklist: trackEvent(withRunTime(termBlacklist), 'termBlacklist'),
+  trustedSources: trackEvent(withRunTime(trustedSources), 'trustedSources')
 };

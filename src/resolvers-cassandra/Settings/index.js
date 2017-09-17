@@ -19,6 +19,8 @@ module.exports = {
   removeBlacklist: mutations.removeBlacklist,
   removeKeywords: mutations.removeKeywords,
   addKeywords: mutations.addKeywords,
+  modifyTrustedSources: mutations.modifyTrustedSources,
+  removeTrustedSources: mutations.removeTrustedSources,
 
   siteTerms: queries.siteTerms,
   sites: queries.sites,
@@ -28,5 +30,6 @@ module.exports = {
   trustedTwitterAccounts: queries.trustedTwitterAccounts,
   facebookPages: queries.facebookPages,
   facebookAnalytics: queries.facebookAnalytics,
-  termBlacklist: queries.termBlacklist
+  termBlacklist: queries.termBlacklist,
+  trustedSources: queries.trustedSources
 };
