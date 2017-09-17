@@ -66,7 +66,7 @@ function trustedsources(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const query = 'SELECT * FROM fortis.trustedsources where pipelinekey IN ?';
     const params = [
-      args.pipelinekeys,
+      args.pipelinekeys
     ];
 
     cassandraConnector.executeQuery(query, params)
