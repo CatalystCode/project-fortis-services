@@ -203,9 +203,8 @@ function facebookAnalytics(args, res) { // eslint-disable-line no-unused-vars
 
 function cassandraRowToTermFilter(row) {
   return {
-    filteredTerms: row.conjunctivefilter,
-    lang: null,
-    RowKey: row.id
+    id: row.id,
+    filteredTerms: row.conjunctivefilter
   };
 }
 
@@ -213,12 +212,11 @@ function termBlacklist(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     const blacklistQuery = 'SELECT id, conjunctivefilter FROM fortis.blacklist';
     cassandraConnector.executeQuery(blacklistQuery, [])
-      .then(rows => {
-        const filters = rows.map(cassandraRowToTermFilter);
-        resolve({ filters: filters });
-      })
-      .catch(reject)
-      ;
+    .then(rows => {
+      const filters = rows.map(cassandraRowToTermFilter);
+      resolve({ filters });
+    })
+    .catch(reject);
   });
 }
 

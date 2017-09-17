@@ -10,7 +10,7 @@ module.exports = graphql.buildSchema(`
     trustedTwitterAccounts(siteId: String!): TrustedTwitterAccountCollection
     facebookPages(siteId: String!): FacebookPageCollection
     facebookAnalytics(siteId: String!, days: Int!): FacebookPageAnalyticsCollection
-    termBlacklist(siteId: String!): BlacklistCollection
+    termBlacklist: BlacklistCollection
   }
 
   type Mutation {
@@ -136,17 +136,6 @@ module.exports = graphql.buildSchema(`
     analytics: [FacebookPageAnalytics]!
   }
 
-  type BlacklistCollection {
-    runTime: String,
-    filters: [TermFilter]!,
-  }
-
-  type TermFilter {
-    filteredTerms: [String],
-    lang: String,
-    RowKey: String
-  }
-
   type FacebookPage {
     RowKey: String
     pageUrl: String
@@ -232,11 +221,6 @@ module.exports = graphql.buildSchema(`
     site: String!
   }
 
-  input BlacklistTermDefintion {
-    terms: [BlacklistTermInput]!
-    site: String!
-  }
-
   input TwitterAccountInput {
     userIds: String!,
     consumerKey: String!,
@@ -250,12 +234,6 @@ module.exports = graphql.buildSchema(`
     RowKey: String!
   }
 
-  input BlacklistTermInput {
-    filteredTerms: [String],
-    lang: String,
-    RowKey: String
-  }
-
   input FacebookPageInput {
     pageUrl: String
     RowKey: String!
@@ -264,5 +242,24 @@ module.exports = graphql.buildSchema(`
   input FacebookPageListInput {
     pages: [FacebookPageInput]!
     site: String!
+  }
+
+  type BlacklistCollection {
+    runTime: String,
+    filters: [TermFilter]!,
+  }
+
+  type TermFilter {
+    id: String!,
+    filteredTerms: [String]
+  }
+
+  input BlacklistTermDefintion {
+    filters: [TermFilterInput]!
+  }
+
+  input TermFilterInput {
+    id: String,
+    filteredTerms: [String]
   }
 `);
