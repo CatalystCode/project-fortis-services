@@ -6,9 +6,9 @@ module.exports = graphql.buildSchema(`
     streams: StreamCollection
     siteTerms(translationLanguage: String): TermCollection
     twitterAccounts: TwitterAccountCollection
-    trustedTwitterAccounts(siteId: String!): TrustedTwitterAccountCollection
     facebookPages(siteId: String!): FacebookPageCollection
     facebookAnalytics(siteId: String!, days: Int!): FacebookPageAnalyticsCollection
+    trustedSources: TrustedSourcesCollection
     termBlacklist: BlacklistCollection
   }
 
@@ -27,6 +27,8 @@ module.exports = graphql.buildSchema(`
     removeTwitterAccounts(input: TwitterAccountDefintion!): TwitterAccountCollection
     modifyTrustedTwitterAccounts(input: TrustedTwitterAccountDefintion!): TrustedTwitterAccountCollection
     removeTrustedTwitterAccounts(input: TrustedTwitterAccountDefintion!): TrustedTwitterAccountCollection
+    modifyTrustedSources(input: TrustedSourcesInput!): TrustedSourcesCollection
+    removeTrustedSources(input: TrustedSourcesInput!): TrustedSourcesCollection
     modifyBlacklist(input: BlacklistTermDefintion!): BlacklistCollection
     removeBlacklist(input: BlacklistTermDefintion!): BlacklistCollection
   }
@@ -230,6 +232,31 @@ module.exports = graphql.buildSchema(`
   input FacebookPageListInput {
     pages: [FacebookPageInput]!
     site: String!
+  }
+
+  type TrustedSourcesCollection {
+    runTime: String,
+    sources: [TrustedSource]
+  }
+
+  type TrustedSource {
+    rowKey: String,
+    pipelineKey: String!,
+    externalSourceId: String!,
+    sourceType: String!,
+    rank: Int!
+  }
+
+  input TrustedSourcesInput {
+    sources: [TrustedSourceInput]
+  }
+
+  input TrustedSourceInput {
+    rowKey: String,
+    pipelineKey: String!,
+    externalSourceId: String!,
+    sourceType: String!,
+    rank: Int!
   }
 
   type BlacklistCollection {

@@ -510,7 +510,7 @@ function removeBlacklist(args, res) { // eslint-disable-line no-unused-vars
 
     const termIds = termFilters.map(termFilter => termFilter.id);
     
-    const query = `
+    const mutation = `
     DELETE
     FROM fortis.blacklist
     WHERE id IN ?
@@ -520,7 +520,7 @@ function removeBlacklist(args, res) { // eslint-disable-line no-unused-vars
       limitForInClause(termIds)
     ];
 
-    cassandraConnector.executeQuery(query, params)
+    cassandraConnector.executeQuery(mutation, params)
     .then(() => {
       return serviceBusClient.sendStringMessage(SERVICE_BUS_CONFIG_QUEUE, JSON.stringify({'dirty': 'blacklist'}));
     })
@@ -528,6 +528,56 @@ function removeBlacklist(args, res) { // eslint-disable-line no-unused-vars
       resolve({
         filters: termFilters
       });
+    })
+    .catch(reject);
+  });
+}
+
+function modifyTrustedSources(args, res) { // eslint-disable-line no-unused-vars
+  return new Promise((resolve, reject) => {
+    const sources = args && args.input && args.input.sources;
+    if (!sources || !sources.length) return reject('No trusted sources to insert specified.');
+
+    let mutations = [];
+    sources.forEach(source => {
+      mutations.push({
+        query: `INSERT INTO fortis.trustedsources (pipelinekey, externalsourceid, sourcetype, rank, insertiontime) 
+        VALUES (?, ?, ?, ?, toTimestamp(now()));`,
+        params: [source.pipelineKey, source.externalSourceId, source.sourceType, source.rank]
+      });
+    });
+
+    cassandraConnector.executeBatchMutations(mutations)
+    .then(() => {
+      resolve({ sources });
+    })
+    .catch(reject);
+  });
+}
+
+function removeTrustedSources(args, res) { // eslint-disable-line no-unused-vars
+  return new Promise((resolve, reject) => {
+    const sources = args && args.input && args.input.sources;
+    if (!sources || !sources.length) return reject('No trusted sources to remove specified.');
+
+    let mutations = [];
+    sources.forEach(source => {
+      mutations.push({
+        query: `
+        DELETE
+        FROM fortis.trustedsources
+        WHERE pipelinekey = ?
+        AND externalsourceid = ?
+        AND sourcetype = ?
+        AND rank = ?;
+        `,
+        params: [source.pipelineKey, source.externalSourceId, source.sourceType, source.rank]
+      });
+    });
+
+    cassandraConnector.executeBatchMutations(mutations)
+    .then(() => {
+      resolve({ sources });
     })
     .catch(reject);
   });
@@ -548,6 +598,8 @@ module.exports = {
   removeTrustedTwitterAccounts: trackEvent(withRunTime(removeTrustedTwitterAccounts), 'removeTrustedTwitterAccounts'),
   modifyTwitterAccounts: trackEvent(withRunTime(modifyTwitterAccounts), 'modifyTwitterAccounts'),
   removeTwitterAccounts: trackEvent(withRunTime(removeTwitterAccounts), 'removeTwitterAccounts'),
+  modifyTrustedSources: trackEvent(withRunTime(modifyTrustedSources), 'modifyTrustedSources'), 
+  removeTrustedSources: trackEvent(withRunTime(removeTrustedSources), 'removeTrustedSources'), 
   modifyBlacklist: trackEvent(withRunTime(modifyBlacklist), 'modifyBlacklist'),
   removeBlacklist: trackEvent(withRunTime(removeBlacklist), 'removeBlacklist')
 };
