@@ -208,7 +208,7 @@ function topTerms(args, res) { // eslint-disable-line no-unused-vars
                 avgsentimentnumerator: Long.ZERO
               })).slice(0, responseSize)
             })
-          )
+          );
       })
       .catch(reject);
   });

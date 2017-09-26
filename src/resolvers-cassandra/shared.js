@@ -4,7 +4,7 @@ const Promise = require('promise');
 const geotile = require('geotile');
 const isObject = require('lodash/isObject');
 const json2csv = require('json2csv');
-const NodeCache = require( "node-cache" );
+const NodeCache = require('node-cache');
 const uuidv4 = require('uuid/v4');
 const { createFile } = require('../clients/storage/BlobStorageClient');
 const cassandraConnector = require('../clients/cassandra/CassandraConnector');
@@ -22,11 +22,11 @@ function termsFilter(term, categoryFilter) {
 }
 
 function getTermsFromCache() {
-  return memoryStore.get("terms");
+  return memoryStore.get('terms');
 }
 
 function setTermsCache(terms) {
-  memoryStore.set("terms", terms);
+  memoryStore.set('terms', terms);
 }
 
 function getTermsByCategory(translationLanguage, category) {
@@ -43,7 +43,7 @@ function getTermsByCategory(translationLanguage, category) {
       .then(watchlistTermsRsp => {
         resolve({
           edges: watchlistTermsRsp.edges.filter(term => termsFilter(term, category))
-        })
+        });
       }).catch(reject);
   });
 }
@@ -106,7 +106,7 @@ function getSiteTerms(translationLanguage, category) {
 
         resolve({
           edges: watchlistTerms.filter(term => termsFilter(term, category))
-        })
+        });
       }).catch(reject);
   });
 }
