@@ -16,7 +16,8 @@ function transformWatchlist(item, translatedlanguage) {
     translatedname: item.lang_code !== (translatedlanguage || item.lang_code) ?
       (item.translations || {})[translatedlanguage] : item.topic,
     translatednamelang: translatedlanguage,
-    namelang: item.lang_code
+    namelang: item.lang_code,
+    category: item.category
   };
 }
 
@@ -25,7 +26,7 @@ function terms(args, res) { // eslint-disable-line no-unused-vars
     const translationLanguage = args.translationLanguage;
 
     const query = `
-    SELECT topicid, topic, translations, lang_code
+    SELECT topicid, topic, translations, lang_code, category
     FROM fortis.watchlist
     `.trim();
 

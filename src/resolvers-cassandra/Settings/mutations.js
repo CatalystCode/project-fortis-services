@@ -36,9 +36,9 @@ function _insertTopics(siteType) {
     blobStorageClient.fetchJson(uri)
     .then(response => {
       return response.map(topic => ({
-        query: `INSERT INTO fortis.watchlist (topicid,topic,lang_code,translations,insertiontime) 
+        query: `INSERT INTO fortis.watchlist (topicid,topic,lang_code,translations,insertiontime,category) 
                 VALUES (?, ?, ?, ?, toTimestamp(now()));`,
-        params: [uuid(), topic.topic, topic.lang_code, topic.translations]
+        params: [uuid(), topic.topic, topic.lang_code, topic.translations, topic.category]
       }));
     })
     .then(response => {
@@ -176,17 +176,17 @@ function createSite(args, res) { // eslint-disable-line no-unused-vars
 
 function removeKeywords(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    if (!args || !args.edges || !args.edges.length) return reject('No keywords to remove specified');
+    if (!args || !args.input || !args.input.edges || !args.input.edges.length) return reject('No keywords to remove specified.');
 
-    const mutations = args.edges.map(edge => ({
-      mutation: 'DELETE FROM fortis.watchlist WHERE keyword = ?',
-      params: [edge.name]
+    const mutations = args.input.edges.map(edge => ({
+      query: 'DELETE FROM fortis.watchlist WHERE topic = ? AND lang_code = ?',
+      params: [edge.name, edge.namelang]
     }));
 
     cassandraConnector.executeBatchMutations(mutations)
     .then(_ => { // eslint-disable-line no-unused-vars
       resolve({
-        edges: args.edges
+        edges: args.input.edges
       });
     })
     .catch(reject);
@@ -195,17 +195,28 @@ function removeKeywords(args, res) { // eslint-disable-line no-unused-vars
 
 function addKeywords(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    if (!args || !args.edges || !args.edges.length) return reject('No keywords to add specified');
+    if (!args || !args.input || !args.input.edges || !args.input.edges.length) return reject('No keywords to add specified.');
 
-    const mutations = args.edges.map(edge => ({
-      mutation: 'INSERT INTO fortis.watchlist (keyword) VALUES (?)',
-      params: [edge.name]
-    }));
+    let mutations = [];
+    args.input.edges.forEach(edge => {
+      let params = paramEntryToMap(edge.translations);
+      mutations.push({
+        query: `INSERT INTO fortis.watchlist (
+          topic,
+          lang_code,
+          category,
+          insertiontime,
+          topicid,
+          translations
+        ) VALUES (?,?,?,dateof(now()),?,?)`,
+        params: [edge.name, edge.namelang, edge.category, edge.topicid, params]
+      });
+    });
 
     cassandraConnector.executeBatchMutations(mutations)
     .then(_ => { // eslint-disable-line no-unused-vars
       resolve({
-        edges: args.edges
+        edges: args.input.edges
       });
     })
     .catch(reject);
