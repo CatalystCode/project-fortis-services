@@ -31,6 +31,11 @@ function getAccessTokenForTranslation(token) {
 
     request.post(POST, (err, response, body) => {
       if (response.statusCode !== 200 || err) {
+        try {
+          err = JSON.parse(body);
+        } catch (exception) {
+          return reject(err);
+        }
         return reject(err);
       } else {
         resolve({
@@ -100,9 +105,9 @@ function TranslateWithToken(access_token, sentence, fromLanguage, toLanguage) {
   });
 }
 
-function translateSentenceArray(wordsToTranslate, fromLanguage, toLanguage) {
+function translateSentenceArray(token, wordsToTranslate, fromLanguage, toLanguage) {
   return new Promise((resolve, reject) => {
-    getAccessTokenForTranslation()
+    getAccessTokenForTranslation(token)
       .then(authBody => {
         TranslateSentenceArrayWithToken(authBody.token, wordsToTranslate, fromLanguage, toLanguage)
           .then(result => resolve({ translatedSentence: result }))
