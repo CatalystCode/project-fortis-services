@@ -189,7 +189,7 @@ function translate(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
     getSiteDefintion()
       .then(sitesettings => {
-        return translatorService.translate(sitesettings.site.properties.translationsvctoken,
+        return translatorService.translate(sitesettings.site.properties.translationSvcToken,
           args.sentence,
           args.fromLanguage,
           args.toLanguage);
@@ -209,8 +209,15 @@ function translate(args, res) { // eslint-disable-line no-unused-vars
 
 function translateWords(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    translatorService.translateSentenceArray(args.words, args.fromLanguage, args.toLanguage)
-      .then(result => {
+    getSiteDefintion()
+      .then(sitesettings => {
+        return translatorService.translateSentenceArray(
+          sitesettings.site.properties.translationSvcToken,
+          args.words,
+          args.fromLanguage,
+          args.toLanguage
+        );
+      }).then(result => {
         const words = result.translatedSentence;
 
         resolve({
