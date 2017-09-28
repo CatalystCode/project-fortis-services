@@ -260,7 +260,10 @@ module.exports = {
   getTermsFromCache,
   getTermsByCategory,
   setTermsCache,
+<<<<<<< HEAD
   BlacklistPlaceList,
+=======
+>>>>>>> 177274503c181a07254249653d26ee7b5455f90d
   transformWatchlist,
   getSiteDefintion,
   fromTopicListToConjunctionTopics,
