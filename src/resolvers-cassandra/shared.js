@@ -9,7 +9,7 @@ const uuidv4 = require('uuid/v4');
 const { createFile } = require('../clients/storage/BlobStorageClient');
 const cassandraConnector = require('../clients/cassandra/CassandraConnector');
 
-const BlacklistPlaces = ["colombia"];
+const BlacklistPlaces = ['colombia'];
 
 const FORTIS_DATA_STORE_TTL = 1200;
 
