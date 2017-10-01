@@ -98,7 +98,6 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     }
 
     const MaxConjunctiveTopicsAllowed = 2;
-    const dateFormat = 'YYYY-MM-DD HH:mm';
 
     const query = `
     SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator, tileid
@@ -129,8 +128,8 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
       .then(rows => {
         const labels = Array.from(makeSet(rows, row => row.conjunctiontopic1.toLowerCase())).map(row => ({ name: row.toLowerCase() }));
         const tiles = Array.from(makeSet(rows, row => row.tileid)).map(row => row);
-        const graphData = aggregateBy(rows, row => `${row.conjunctiontopic1.toLowerCase()}_${row.perioddate}`, row => ({
-          date: moment(row.perioddate).format(dateFormat),
+        const graphData = aggregateBy(rows, row => `${row.conjunctiontopic1.toLowerCase()}_${row.perioddate.getTime()}`, row => ({
+          date: row.perioddate.getTime(),
           name: row.conjunctiontopic1.toLowerCase(),
           mentions: Long.ZERO,
           avgsentimentnumerator: Long.ZERO
