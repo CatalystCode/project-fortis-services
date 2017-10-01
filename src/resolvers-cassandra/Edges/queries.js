@@ -1,7 +1,6 @@
 'use strict';
 
 const Promise = require('promise');
-const moment = require('moment');
 const Long = require('cassandra-driver').types.Long;
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
