@@ -1,14 +1,14 @@
 'use strict';
 
 const Promise = require('promise');
-const moment = require('moment');
 const Long = require('cassandra-driver').types.Long;
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const featureServiceClient = require('../../clients/locations/FeatureServiceClient');
-const { tilesForBbox, withRunTime, withCsvExporter, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
+const { tilesForBbox, BlacklistPlaceList, withRunTime, getTermsByCategory, withCsvExporter, toConjunctionTopics, fromTopicListToConjunctionTopics } = require('../shared');
 const { makeSet, makeMap, aggregateBy } = require('../../utils/collections');
 const { trackEvent } = require('../../clients/appinsights/AppInsightsClient');
 
+//todo: this is a temporary ugly hack until Nate adds the blacklist place feature
 const MaxFetchedRows = 1000;
 
 function popularLocations(args, res) { // eslint-disable-line no-unused-vars
@@ -73,6 +73,7 @@ function popularLocations(args, res) { // eslint-disable-line no-unused-vars
                   layer: row.layer,
                   avgsentimentnumerator: Long.ZERO
                 }))
+                  .filter(item=>BlacklistPlaceList().indexOf(item.name.toLowerCase()) === -1)
                   .slice(0, responseSize)
               });
             })
@@ -96,7 +97,6 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
     }
 
     const MaxConjunctiveTopicsAllowed = 2;
-    const dateFormat = 'YYYY-MM-DD HH:mm';
 
     const query = `
     SELECT conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, perioddate, mentioncount, avgsentimentnumerator, tileid
@@ -127,8 +127,8 @@ function timeSeries(args, res) { // eslint-disable-line no-unused-vars
       .then(rows => {
         const labels = Array.from(makeSet(rows, row => row.conjunctiontopic1.toLowerCase())).map(row => ({ name: row.toLowerCase() }));
         const tiles = Array.from(makeSet(rows, row => row.tileid)).map(row => row);
-        const graphData = aggregateBy(rows, row => `${row.conjunctiontopic1.toLowerCase()}_${row.perioddate}`, row => ({
-          date: moment(row.perioddate).format(dateFormat),
+        const graphData = aggregateBy(rows, row => `${row.conjunctiontopic1.toLowerCase()}_${row.perioddate.getTime()}`, row => ({
+          date: row.perioddate.getTime(),
           name: row.conjunctiontopic1.toLowerCase(),
           mentions: Long.ZERO,
           avgsentimentnumerator: Long.ZERO
@@ -169,40 +169,47 @@ function topTerms(args, res) { // eslint-disable-line no-unused-vars
     const fetchSize = 400;
     const responseSize = args.limit || 5;
 
-    const query = `
-    SELECT mentioncount, conjunctiontopic1, avgsentimentnumerator
-    FROM fortis.populartopics
-    WHERE periodtype = ?
-    AND pipelinekey IN ?
-    AND externalsourceid = ?
-    AND tilez = ?
-    AND perioddate <= '${args.toDate}'
-    AND perioddate >= '${args.fromDate}'
-    AND tileid IN ?
-    LIMIT ?
-    `.trim();
+    getTermsByCategory(null, args.category)
+      .then(terms => {
 
-    //todo: figure out why node driver timezone conversion is filtering out a majority of records
-    const params = [
-      args.periodType,
-      args.pipelinekeys,
-      args.externalsourceid,
-      args.zoomLevel,
-      tilesForBbox(args.bbox, args.zoomLevel).map(tile => tile.id),
-      MaxFetchedRows
-    ];
+        const query = `
+          SELECT mentioncount, conjunctiontopic1, avgsentimentnumerator
+          FROM fortis.populartopics
+          WHERE periodtype = ?
+          AND pipelinekey IN ?
+          AND externalsourceid = ?
+          AND tilez = ?
+          AND perioddate <= '${args.toDate}'
+          AND perioddate >= '${args.fromDate}'
+          AND tileid IN ?
+          AND conjunctiontopic1 IN ?
+          AND conjunctiontopic2 = ''
+          AND conjunctiontopic3 = ''
+          LIMIT ?
+          `.trim();
 
-    return cassandraConnector.executeQuery(query, params, { fetchSize })
-      .then(rows =>
-        resolve({
-          edges: aggregateBy(rows, row => `${row.conjunctiontopic1}`, row => ({
-            name: row.conjunctiontopic1,
-            mentions: Long.ZERO,
-            avgsentimentnumerator: Long.ZERO
-          }))
-            .slice(0, responseSize)
-        })
-      )
+        //todo: figure out why node driver timezone conversion is filtering out a majority of records
+        const params = [
+          args.periodType,
+          args.pipelinekeys,
+          args.externalsourceid,
+          args.zoomLevel,
+          tilesForBbox(args.bbox, args.zoomLevel).map(tile => tile.id),
+          terms.edges.map(item => item.name),
+          MaxFetchedRows
+        ];
+
+        return cassandraConnector.executeQuery(query, params, { fetchSize })
+          .then(rows =>
+            resolve({
+              edges: aggregateBy(rows, row => `${row.conjunctiontopic1}`, row => ({
+                name: row.conjunctiontopic1,
+                mentions: Long.ZERO,
+                avgsentimentnumerator: Long.ZERO
+              })).slice(0, responseSize)
+            })
+          );
+      })
       .catch(reject);
   });
 }
