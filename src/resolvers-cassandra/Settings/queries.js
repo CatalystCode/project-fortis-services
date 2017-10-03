@@ -5,6 +5,7 @@ const facebookAnalyticsClient = require('../../clients/facebook/FacebookAnalytic
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const { withRunTime, getSiteDefintion } = require('../shared');
 const trackEvent = require('../../clients/appinsights/AppInsightsClient').trackEvent;
+const loggingClient = require('../../clients/appinsights/LoggingClient');
 
 const PIPELINE_KEY_TWITTER = 'twitter';
 const CONNECTOR_FACEBOOK = 'Facebook';
@@ -32,13 +33,12 @@ function terms(args, res) { // eslint-disable-line no-unused-vars
 
     const params = [];
     cassandraConnector.executeQuery(query, params)
-      .then(rows =>
+      .then(rows => {
+        const edges = rows.map(item => transformWatchlist(item, translationLanguage)).filter(term => term.translatedname);
         resolve({
-          edges: rows
-            .map(item => transformWatchlist(item, translationLanguage))
-            .filter(term => term.translatedname)
-        })
-      ).catch(reject);
+          edges
+        });
+      }).catch(reject);
   });
 }
 
@@ -224,7 +224,7 @@ function termBlacklist(args, res) { // eslint-disable-line no-unused-vars
 module.exports = {
   sites: trackEvent(withRunTime(sites), 'sites'),
   streams: trackEvent(withRunTime(streams), 'streams'),
-  siteTerms: trackEvent(withRunTime(terms), 'terms'),
+  siteTerms: trackEvent(withRunTime(terms), 'terms', loggingClient.termsExtraProps(), loggingClient.keywordsExtraMetrics()),
   trustedSources: trackEvent(withRunTime(trustedSources), 'trustedsources'),
   twitterAccounts: trackEvent(withRunTime(twitterAccounts), 'twitterAccounts'),
   trustedTwitterAccounts: trackEvent(withRunTime(trustedTwitterAccounts), 'trustedTwitterAccounts'),
